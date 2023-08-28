@@ -11,6 +11,9 @@ router.post('/check-duplicate', userController.checkDuplicate);
 // 로그인 라우트
 router.post('/login', userController.login);
 
+// 로그아웃 라우트 (DELETE)
+router.delete('/logout', userController.logout);
+
 // 프로필 설정 라우트
 router.post("/setProfile", userController.setProfile);
 
@@ -19,6 +22,11 @@ router.post("/rules", userController.rules);
 
 // 카운트 증가 추가 라우트 
 router.post("/increaseCount", userController.increaseCount);
+
+// 색깔 변경 라우트 
+router.post("/updateColor", userController.Calendar);
+
+
 
 
 

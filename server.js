@@ -30,7 +30,7 @@ app.post('/upload', upload.single('image'), (req, res) => {
   // 이미지 업로드 처리 로직
   console.log('Image uploaded:', req.file); // 업로드된 이미지 정보 확인
   res.send('Image uploaded successfully');
-});
+});``
 
 // 서버 실행
 app.listen(PORT, () => {
