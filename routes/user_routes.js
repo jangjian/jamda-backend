@@ -14,6 +14,9 @@ router.post('/login', userController.login);
 // 로그아웃 라우트 (DELETE)
 router.delete('/logout', userController.logout);
 
+// 탈퇴 라우트 (DELETE)
+router.delete('/leave', userController.leave);
+
 // 프로필 설정 라우트
 router.post("/setProfile", userController.setProfile);
 
@@ -25,9 +28,6 @@ router.post("/increaseCount", userController.increaseCount);
 
 // 색깔 변경 라우트 
 router.post("/updateColor", userController.Calendar);
-
-
-
 
 
 module.exports = router;

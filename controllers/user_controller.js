@@ -27,7 +27,6 @@ exports.signup = (req, res) => {
       res.status(500).json({ error: 'Error registering user' });
       return;
     }
-    res.redirect('/login.html');
     console.log('User registered successfully');
     res.status(200).json({ message: 'User registered successfully' });
   });
@@ -171,7 +170,7 @@ exports.rules = (req, res) => {
   });
 };
 
-
+// 운동량 누적 컨트롤러
 exports.increaseCount = (req, res)=> {
   const {uuid} = req.body;
   const sql = 'UPDATE rules SET count = count+1 WHERE uuid = ?;';
@@ -187,6 +186,7 @@ exports.increaseCount = (req, res)=> {
   })
 }
 
+// 캘린더 컨트롤러 (스탬프)
 exports.Calendar = (req, res)=> {
   const { userid } = req.body;
   const completedate = new Date();
@@ -223,4 +223,64 @@ exports.logout = (req, res) => {
   });
 };
 
+// 탈퇴 컨트롤러
+exports.leave = (req, res) => {
+  const { userid } = req.body;
+
+  // 사용자 정보 삭제
+  const deleteSql = 'DELETE FROM users WHERE userid = ?';
+  connection.query(deleteSql, [userid], (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Error during account deletion' });
+      return;
+    }
+
+    // 사용자 규칙 정보 삭제
+    const deleteRulesSql = 'DELETE FROM rules WHERE userid = ?';
+    connection.query(deleteRulesSql, [userid], (err, result) => {
+      if (err) {
+        console.error(err);
+      } else {
+        console.log('User rules deleted successfully');
+      }
+    });
+
+    // 사용자 캘린더 데이터 삭제
+    const deleteCalendarSql = 'DELETE FROM calendar WHERE userid = ?';
+    connection.query(deleteCalendarSql, [userid], (err, result) => {
+      if (err) {
+        console.error(err);
+      } else {
+        console.log('User calendar data deleted successfully');
+      }
+    });
+
+    // 프로필 정보 삭제 및 이미지 삭제
+    const deleteProfileAndImageSql = 'DELETE FROM users WHERE userid = ?';
+    connection.query(deleteProfileAndImageSql, [userid], (err, result) => {
+      if (err) {
+        console.error(err);
+        return callback(err, null);
+      }
+
+      console.log('Profile and image deleted successfully');
+
+      // 이미지 파일을 파일 시스템에서 삭제
+      if (result.length > 0 && result[0].image) {
+        const imagePath = path.join(__dirname, '..', 'public', result[0].image);
+        fs.unlink(imagePath, (unlinkErr) => {
+          if (unlinkErr) {
+            console.error('Error deleting image:', unlinkErr);
+          } else {
+            console.log('Image file deleted successfully');
+          }
+        });
+      }
+    });
+
+    console.log('Account deleted successfully');
+    res.status(200).json({ message: 'Account deleted successfully' });
+  });
+};
 
