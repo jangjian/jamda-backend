@@ -29,5 +29,8 @@ router.post("/increaseCount", userController.increaseCount);
 // 색깔 변경 라우트 
 router.post("/updateColor", userController.Calendar);
 
+// 인증번호 라우트 
+router.post("/certificate", userController.certificate);
+
 
 module.exports = router;

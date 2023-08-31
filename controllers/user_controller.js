@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const randomstring = require('randomstring')
 const cron = require('node-cron');
+const nodemailer = require('nodemailer');
 const connection = mysql.createConnection({
   host: 'localhost',
   user: 'root',
@@ -18,10 +19,10 @@ connection.connect((err) => {
 
 // 회원가입 컨트롤러
 exports.signup = (req, res) => {
-  const { userid, pw, tel } = req.body;
+  const { userid, pw, email } = req.body;
 
-  const sql = 'INSERT INTO users (userid, pw, tel) VALUES (?, ?, ?)';
-  connection.query(sql, [userid, pw, tel], (err, result) => {
+  const sql = 'INSERT INTO users (userid, pw, email) VALUES (?, ?, ?)';
+  connection.query(sql, [userid, pw, email], (err, result) => {
     if (err) {
       console.error(err);
       res.status(500).json({ error: 'Error registering user' });
@@ -284,3 +285,26 @@ exports.leave = (req, res) => {
   });
 };
 
+// 인증번호 컨트롤러
+exports.certificate = async(req, res)=> {
+  const { email } = req.body;
+  const transporter = nodemailer.createTransport({
+    service: "gmail",  // 이메일
+    auth: {
+      user: "jamda831@gmail.com",  // 발송자 이메일
+      pass: "nhvluiqogrktkieu",  // 발송자 비밀번호
+    },
+  });
+  
+  const mailOptions = {
+    to: email,
+    subject: "이메일 인증",
+    html: `<h1>이메일 인증</h1>
+            <div>
+              똥입니다
+            </div>`,
+    text: "똥이에요 똥.",
+  };
+  const info = await transporter.sendMail(mailOptions);
+  console.log(info);
+};

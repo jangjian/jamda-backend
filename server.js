@@ -10,6 +10,8 @@ const PORT = 3000;
 app.use(cors());
 app.use(bodyParser.json());
 
+
+
 // multer 설정
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
