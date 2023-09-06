@@ -11,15 +11,15 @@ const connection = mysql.createConnection({
   database: 'jamda_backend'
 });
 
-// database 연결
-connection.connect((err) => {
-  if (err) throw err;
-  console.log('Connected to MySQL Database');
-});
-
 // 회원가입 컨트롤러
 exports.signup = (req, res) => {
-  const { userid, pw, email } = req.body;
+  const { userid, pw, email, authCode } = req.body; // 인증코드(authCode) 추가
+
+  // 사용자가 입력한 인증코드를 이메일로 발송한 코드와 비교
+  if (!validateAuthCode(email, authCode)) {
+    res.status(401).json({ error: '인증코드가 일치하지 않습니다.' });
+    return;
+  }
 
   const sql = 'INSERT INTO users (userid, pw, email) VALUES (?, ?, ?)';
   connection.query(sql, [userid, pw, email], (err, result) => {
@@ -226,11 +226,11 @@ exports.logout = (req, res) => {
 
 // 탈퇴 컨트롤러
 exports.leave = (req, res) => {
-  const { userid } = req.body;
+  const { accesstoken } = req.user;
 
   // 사용자 정보 삭제
-  const deleteSql = 'DELETE FROM users WHERE userid = ?';
-  connection.query(deleteSql, [userid], (err, result) => {
+  const deleteSql = 'DELETE FROM users WHERE accesstoken = ?';
+  connection.query(deleteSql, [accesstoken], (err, result) => {
     if (err) {
       console.error(err);
       res.status(500).json({ error: 'Error during account deletion' });
@@ -238,8 +238,8 @@ exports.leave = (req, res) => {
     }
 
     // 사용자 규칙 정보 삭제
-    const deleteRulesSql = 'DELETE FROM rules WHERE userid = ?';
-    connection.query(deleteRulesSql, [userid], (err, result) => {
+    const deleteRulesSql = 'DELETE FROM rules WHERE accesstoken = ?';
+    connection.query(deleteRulesSql, [accesstoken], (err, result) => {
       if (err) {
         console.error(err);
       } else {
@@ -248,8 +248,8 @@ exports.leave = (req, res) => {
     });
 
     // 사용자 캘린더 데이터 삭제
-    const deleteCalendarSql = 'DELETE FROM calendar WHERE userid = ?';
-    connection.query(deleteCalendarSql, [userid], (err, result) => {
+    const deleteCalendarSql = 'DELETE FROM calendar WHERE accesstoken = ?';
+    connection.query(deleteCalendarSql, [accesstoken], (err, result) => {
       if (err) {
         console.error(err);
       } else {
@@ -258,8 +258,8 @@ exports.leave = (req, res) => {
     });
 
     // 프로필 정보 삭제 및 이미지 삭제
-    const deleteProfileAndImageSql = 'DELETE FROM users WHERE userid = ?';
-    connection.query(deleteProfileAndImageSql, [userid], (err, result) => {
+    const deleteProfileAndImageSql = 'DELETE FROM users WHERE accesstoken = ?';
+    connection.query(deleteProfileAndImageSql, [accesstoken], (err, result) => {
       if (err) {
         console.error(err);
         return callback(err, null);
@@ -286,8 +286,12 @@ exports.leave = (req, res) => {
 };
 
 // 인증번호 컨트롤러
-exports.certificate = async(req, res)=> {
+exports.certificate = async (req, res) => {
   const { email } = req.body;
+  
+  // 랜덤한 4자리 숫자 생성
+  const verificationCode = Math.floor(1000 + Math.random() * 9000);
+
   const transporter = nodemailer.createTransport({
     service: "gmail",  // 이메일
     auth: {
@@ -295,16 +299,67 @@ exports.certificate = async(req, res)=> {
       pass: "nhvluiqogrktkieu",  // 발송자 비밀번호
     },
   });
-  
+
   const mailOptions = {
     to: email,
     subject: "이메일 인증",
-    html: `<h1>이메일 인증</h1>
-            <div>
-              똥입니다
-            </div>`,
-    text: "똥이에요 똥.",
+    html: `    <div style="margin: 5%; margin-bottom: 6px;"><img src="../image/JAMDA.svg" style="width: 170px;"></img></div>
+    <div style="height: 2px; width: 90%; margin-left: 5%; background-color: #FF8585;"></div>
+    <h2 style="margin-left: 5%; margin-top: 30px; margin-bottom: 30px;">고객님의 인증번호는 다음과 같습니다.</h2>
+    <div style=" height: 230px; width: 90%; margin-left: 5%; border: 2px solid #C1C1C1">
+        <p style="color: #6B6B6B; text-align: center;">아래 인증번호 4자리를 인증번호 입력창에 입력해주세요</p>
+        <div style="text-align: center; font-size: 80px; vertical-align: middle; letter-spacing: 10px;">${verificationCode}</div>
+    </div>
+    <p style="margin-left: 5%; margin-top: 20px;">
+        인증번호를 요청하지 않았다면 이 메일을 무시하셔도 됩니다.<br>
+        누군가 귀하의 이메일 주소를 잘못 입력한 것을 수도 있습니다.<br>
+        <br>
+        감사합니다.
+    </p>`,
   };
-  const info = await transporter.sendMail(mailOptions);
-  console.log(info);
+
+  const sql = 'INSERT INTO verification_codes (email, code) VALUES (?, ?)';
+  connection.query(sql, [email, verificationCode], (err, result)=>{
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: '이메일을 발송하는 중 오류가 발생하였습니다.' });
+    }
+  });
+  
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log(info);
+    return res.status(200).json({ message: "이메일이 성공적으로 전송되었습니다." });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "이메일 전송 중에 오류가 발생했습니다." });
+  }
 };
+
+
+
+// 인증번호 확인 함수
+exports.checkAuthCode = (req, res) => {
+  const { email, code } = req.body;
+  
+  // 사용자가 입력한 이메일과 인증번호를 검색하여 확인
+  const checkAuthCodeSql = 'SELECT * FROM verification_codes WHERE email = ? AND code = ?';
+  connection.query(checkAuthCodeSql, [email, code], (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Error checking auth code' });
+      return;
+    }
+
+    // 결과에서 매치되는 레코드를 찾지 못하면 인증 실패
+    if (result.length === 0) {
+      res.status(401).json({ error: '인증번호가 일치하지 않습니다.' });
+      console.log(result);
+      return;
+    }
+
+    // 인증 성공
+    return res.status(200).json({ message: '인증번호가 확인되었습니다.' });
+  });
+};
+
