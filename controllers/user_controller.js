@@ -6,9 +6,9 @@ const cron = require('node-cron');
 const nodemailer = require('nodemailer');
 const connection = mysql.createConnection({
   host: 'localhost',
-  user: 'root',
+  user: 'jamda',
   password: '1011',
-  database: 'jamda_backend'
+  database: 'jamda_db'
 });
 
 // 회원가입 컨트롤러
