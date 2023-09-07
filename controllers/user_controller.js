@@ -310,7 +310,7 @@ exports.certificate = async (req, res) => {
       <h2 style="margin-left: 5%; margin-top: 30px; margin-bottom: 30px;">고객님의 인증번호는 다음과 같습니다.</h2>
       <div style=" height: 230px; width: 90%; margin-left: 5%; border: 2px solid #C1C1C1">
           <p style="color: #6B6B6B; text-align: center;">아래 인증번호 4자리를 인증번호 입력창에 입력해주세요</p>
-          <div style="text-align: center; font-size: 80px; vertical-align: middle; letter-spacing: 10px;">1234</div>
+          <div style="text-align: center; font-size: 80px; vertical-align: middle; letter-spacing: 10px;">${verificationCode}</div>
       </div>
       <p style="margin-left: 5%; margin-top: 20px;">
           인증번호를 요청하지 않았다면 이 메일을 무시하셔도 됩니다.<br>
