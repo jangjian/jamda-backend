@@ -11,17 +11,10 @@ const connection = mysql.createConnection({
   database: 'jamda_db'
 });
 
-
 // 회원가입 컨트롤러
 exports.signup = (req, res) => {
-  const { userid, pw, email, authCode } = req.body; // 인증코드(authCode) 추가
-
-  // 사용자가 입력한 인증코드를 이메일로 발송한 코드와 비교
-  if (!validateAuthCode(email, authCode)) {
-    res.status(401).json({ error: '인증코드가 일치하지 않습니다.' });
-    return;
-  }
-
+  const { userid, pw, email } = req.body; // 인증코드(authCode) 추가
+  
   const sql = 'INSERT INTO users (userid, pw, email) VALUES (?, ?, ?)';
   connection.query(sql, [userid, pw, email], (err, result) => {
     if (err) {
@@ -286,58 +279,65 @@ exports.leave = (req, res) => {
   });
 };
 
-// 인증번호 컨트롤러
+// 이메일 인증 코드 요청 컨트롤러
 exports.certificate = async (req, res) => {
   const { email } = req.body;
-  
-  // 랜덤한 4자리 숫자 생성
-  const verificationCode = Math.floor(1000 + Math.random() * 9000);
 
-  const transporter = nodemailer.createTransport({
-    service: "gmail",  // 이메일
-    auth: {
-      user: "jamda831@gmail.com",  // 발송자 이메일
-      pass: "nhvluiqogrktkieu",  // 발송자 비밀번호
-    },
-  });
-
-  const mailOptions = {
-    to: email,
-    subject: "이메일 인증",
-    html: `    <div style="margin: 5%; margin-bottom: 6px;"><img src="../image/JAMDA.svg" style="width: 170px;"></img></div>
-    <div style="height: 2px; width: 90%; margin-left: 5%; background-color: #FF8585;"></div>
-    <h2 style="margin-left: 5%; margin-top: 30px; margin-bottom: 30px;">고객님의 인증번호는 다음과 같습니다.</h2>
-    <div style=" height: 230px; width: 90%; margin-left: 5%; border: 2px solid #C1C1C1">
-        <p style="color: #6B6B6B; text-align: center;">아래 인증번호 4자리를 인증번호 입력창에 입력해주세요</p>
-        <div style="text-align: center; font-size: 80px; vertical-align: middle; letter-spacing: 10px;">${verificationCode}</div>
-    </div>
-    <p style="margin-left: 5%; margin-top: 20px;">
-        인증번호를 요청하지 않았다면 이 메일을 무시하셔도 됩니다.<br>
-        누군가 귀하의 이메일 주소를 잘못 입력한 것을 수도 있습니다.<br>
-        <br>
-        감사합니다.
-    </p>`,
-  };
-
-  const sql = 'INSERT INTO verification_codes (email, code) VALUES (?, ?)';
-  connection.query(sql, [email, verificationCode], (err, result)=>{
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ error: '이메일을 발송하는 중 오류가 발생하였습니다.' });
+  // 기존에 해당 이메일로 생성된 인증 코드가 있다면 삭제
+  const deleteAuthCodeSql = 'DELETE FROM verification_codes WHERE email = ?';
+  connection.query(deleteAuthCodeSql, [email], async (deleteErr, deleteResult) => {
+    if (deleteErr) {
+      console.error(deleteErr);
+      return res.status(500).json({ error: '기존 인증 코드를 삭제하는 중 오류가 발생하였습니다.' });
     }
+
+    // 새로운 랜덤한 4자리 숫자 생성
+    const verificationCode = Math.floor(1000 + Math.random() * 9000);
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "jamda831@gmail.com",
+        pass: "nhvluiqogrktkieu",
+      },
+    });
+
+    const mailOptions = {
+      to: email,
+      subject: "이메일 인증",
+      html: `    <div style="margin: 5%; margin-bottom: 6px;"><p style="width: 170px; color:#FF6666; font-weight: bolder; font-size: 50px; margin-bottom: 0">JAMDA</p></div>
+      <div style="height: 2px; width: 90%; margin-left: 5%; background-color: #FF8585;"></div>
+      <h2 style="margin-left: 5%; margin-top: 30px; margin-bottom: 30px;">고객님의 인증번호는 다음과 같습니다.</h2>
+      <div style=" height: 230px; width: 90%; margin-left: 5%; border: 2px solid #C1C1C1">
+          <p style="color: #6B6B6B; text-align: center;">아래 인증번호 4자리를 인증번호 입력창에 입력해주세요</p>
+          <div style="text-align: center; font-size: 80px; vertical-align: middle; letter-spacing: 10px;">1234</div>
+      </div>
+      <p style="margin-left: 5%; margin-top: 20px;">
+          인증번호를 요청하지 않았다면 이 메일을 무시하셔도 됩니다.<br>
+          누군가 귀하의 이메일 주소를 잘못 입력한 것을 수도 있습니다.<br>
+          <br>
+          감사합니다.
+      </p>`,
+    };
+
+    const insertAuthCodeSql = 'INSERT INTO verification_codes (email, code) VALUES (?, ?)';
+    connection.query(insertAuthCodeSql, [email, verificationCode], async (insertErr, insertResult) => {
+      if (insertErr) {
+        console.error(insertErr);
+        return res.status(500).json({ error: '이메일을 발송하는 중 오류가 발생하였습니다.' });
+      }
+
+      try {
+        const info = await transporter.sendMail(mailOptions);
+        console.log(info);
+        return res.status(200).json({ message: "이메일이 성공적으로 전송되었습니다." });
+      } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "이메일 전송 중에 오류가 발생했습니다." });
+      }
+    });
   });
-  
-  try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log(info);
-    return res.status(200).json({ message: "이메일이 성공적으로 전송되었습니다." });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "이메일 전송 중에 오류가 발생했습니다." });
-  }
 };
-
-
 
 // 인증번호 확인 함수
 exports.checkAuthCode = (req, res) => {
@@ -354,7 +354,7 @@ exports.checkAuthCode = (req, res) => {
 
     // 결과에서 매치되는 레코드를 찾지 못하면 인증 실패
     if (result.length === 0) {
-      res.status(200).json({ error: '인증번호가 일치하지 않습니다.' });
+      res.status(201).json({ message: '인증번호가 일치하지 않습니다.' });
       console.log(result);
       return;
     }
@@ -363,4 +363,3 @@ exports.checkAuthCode = (req, res) => {
     return res.status(200).json({ message: '인증번호가 확인되었습니다.' });
   });
 };
-
