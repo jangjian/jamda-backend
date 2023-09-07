@@ -11,6 +11,7 @@ const connection = mysql.createConnection({
   database: 'jamda_db'
 });
 
+
 // 회원가입 컨트롤러
 exports.signup = (req, res) => {
   const { userid, pw, email, authCode } = req.body; // 인증코드(authCode) 추가
@@ -353,7 +354,7 @@ exports.checkAuthCode = (req, res) => {
 
     // 결과에서 매치되는 레코드를 찾지 못하면 인증 실패
     if (result.length === 0) {
-      res.status(401).json({ error: '인증번호가 일치하지 않습니다.' });
+      res.status(200).json({ error: '인증번호가 일치하지 않습니다.' });
       console.log(result);
       return;
     }
