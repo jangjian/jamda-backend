@@ -47,8 +47,6 @@ exports.checkDuplicate = (req, res) => {
 exports.login = (req, res) => {
   const { userid, pw } = req.body;
   var token = randomstring.generate(40);
-
-
   const sql = 'SELECT * FROM users WHERE userid = ? AND pw = ?';
   connection.query(sql, [userid, pw], (err, result) => {
     if (err) {
@@ -56,7 +54,6 @@ exports.login = (req, res) => {
       res.status(500).json({ error: 'Error during login' });
       return;
     }
-
     if (result.length === 0) {
       res.status(401).json({ error: 'Invalid credentials' });
       return;
@@ -67,26 +64,60 @@ exports.login = (req, res) => {
   });
 };
 
+
 // 프로필 설정 엔드포인트 추가
 exports.setProfile = (req, res) => {
-  const { userid, name, bias, weight, height, goal_weight } = req.body;
+  const { accesstoken } = req.body; // 클라이언트에서 전달한 토큰
+  const { name, bias, weight, height, goal_weight } = req.body; // 클라이언트에서 전달한 프로필 정보
   const image = req.files && req.files.image; // 이미지 파일
 
-  // 이미지 업로드 및 프로필 업데이트 로직
-  updateProfileWithImage(userid, name, bias, image, weight, height, goal_weight, (err, updatedProfile) => {
+  // 로그인된 사용자의 토큰을 사용하여 사용자를 식별하고 프로필 업데이트
+  identifyUserByToken(accesstoken, (err, user) => {
     if (err) {
-      res.status(500).send({
-        message: err.message || "Error updating profile."
-      });
+      res.status(401).json({ error: '인증 실패' });
       return;
     }
 
-    res.status(200).send({
-      message: "Profile updated successfully.",
-      profile: updatedProfile
-    });
+    if (user) {
+      // 이미지 업로드 및 프로필 업데이트 로직
+      updateProfileWithImage(user.userid, name, bias, image, weight, height, goal_weight, (err, updatedProfile) => {
+        if (err) {
+          res.status(500).send({
+            message: err.message || "프로필 업데이트 중 오류 발생."
+          });
+          return;
+        }
+
+        res.status(200).send({
+          message: "프로필이 성공적으로 업데이트되었습니다.",
+          profile: updatedProfile
+        });
+      });
+    } else {
+      res.status(401).json({ error: '인증 실패' });
+    }
   });
 };
+
+// 토큰을 사용하여 사용자 식별
+function identifyUserByToken(accesstoken, callback) {
+  const identifyUserSql = 'SELECT * FROM users WHERE accesstoken = ?';
+  connection.query(identifyUserSql, [accesstoken], (err, result) => {
+    if (err) {
+      console.error(err);
+      return callback(err, null);
+    }
+
+    if (result.length > 0) {
+      // 토큰을 사용하여 사용자 식별 성공
+      return callback(null, result[0]);
+    } else {
+      // 토큰을 사용하여 사용자 식별 실패
+      return callback(null, null);
+    }
+  });
+}
+
 
 // 프로필 업데이트 및 이미지 업로드
 function updateProfileWithImage(userid, name, bias, image, weight, height, goal_weight, callback) {
@@ -111,9 +142,9 @@ function updateProfileWithImage(userid, name, bias, image, weight, height, goal_
 }
 
 // 데이터베이스 업데이트 로직
-function updateProfileAndImageInDB(userid, name, bias, imageName, weight, height, goal_weight, callback) {
-  const updateProfileSql = 'UPDATE users SET name = ?, bias = ?, image = ?, weight = ?, height = ?, goal_weight = ? WHERE userid = ?';
-  connection.query(updateProfileSql, [name, bias, imageName, weight, height, goal_weight, userid], (err, result) => {
+function updateProfileAndImageInDB(accesstoken, name, bias, imageName, weight, height, goal_weight, callback) {
+  const updateProfileSql = 'UPDATE users SET name = ?, bias = ?, image = ?, weight = ?, height = ?, goal_weight = ? WHERE accesstoken = ?';
+  connection.query(updateProfileSql, [name, bias, imageName, weight, height, goal_weight, accesstoken], (err, result) => {
     if (err) {
       console.error(err);
       return callback(err, null);
@@ -121,7 +152,7 @@ function updateProfileAndImageInDB(userid, name, bias, imageName, weight, height
 
     // 업데이트된 프로필 정보를 가져옴
     const updatedProfile = {
-      userid: userid,
+      accesstoken: accesstoken,
       name: name,
       bias: bias,
       image: imageName, // 이미지 파일명
