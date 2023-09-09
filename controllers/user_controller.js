@@ -83,6 +83,7 @@ exports.setProfile = (req, res) => {
       return;
     }
     console.log('프로필 설정이 되었습니다.');
+    res.status(200).json({ message: 'profile set successfully'  });
   });
 };
 
