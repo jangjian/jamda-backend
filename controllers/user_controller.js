@@ -336,7 +336,7 @@ exports.certificate = async (req, res) => {
     const mailOptions = {
       to: email,
       subject: "이메일 인증",
-      html: `    <div style="margin: 5%; margin-bottom: 6px;"><p style="width: 170px; color:#FF6666; font-weight: bolder; font-size: 50px; margin-bottom: 0">JAMDA</p></div>
+      html: `    <div style="margin: 5%; margin-bottom: 6px;"><p color:#FF6666; font-weight: bolder; font-size: 50px; margin-bottom: 0">JAMDA</p></div>
       <div style="height: 2px; width: 90%; margin-left: 5%; background-color: #FF8585;"></div>
       <h2 style="margin-left: 5%; margin-top: 30px; margin-bottom: 30px;">고객님의 인증번호는 다음과 같습니다.</h2>
       <div style=" height: 230px; width: 90%; margin-left: 5%; border: 2px solid #C1C1C1">
