@@ -67,7 +67,6 @@ exports.login = (req, res) => {
   });
 };
 
-
 // 시작 프로필 설정 엔드포인트 추가
 exports.setProfile = (req, res) => {
   const { accesstoken } = req.body; // 클라이언트에서 전달한 토큰

@@ -22,7 +22,7 @@ router.delete('/leave', getUser,userController.leave);
 router.post("/setProfile", userController.setProfile);
 
 // 규칙 추가 라우트 
-router.post("/rules", getUser,userController.rules);
+router.post("/rules", userController.rules);
 
 // 카운트 증가 추가 라우트 
 router.post("/increaseCount", userController.increaseCount);
