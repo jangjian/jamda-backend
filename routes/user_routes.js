@@ -19,7 +19,7 @@ router.delete('/logout', userController.logout);
 router.delete('/leave', getUser,userController.leave);
 
 // 프로필 설정 라우트
-router.post("/setProfile", getUser,userController.setProfile);
+router.post("/setProfile", userController.setProfile);
 
 // 규칙 추가 라우트 
 router.post("/rules", userController.rules);

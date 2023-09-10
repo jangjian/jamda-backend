@@ -41,9 +41,10 @@ exports.checkDuplicate = (req, res) => {
   });
 };
 
-// 로그인 컨트롤러 수정
+// 로그인 컨트롤러
 exports.login = (req, res) => {
   const { userid, pw } = req.body;
+  var token = randomstring.generate(40);
   const sql = 'SELECT * FROM users WHERE userid = ? AND pw = ?';
   connection.query(sql, [userid, pw], (err, result) => {
     if (err) {
@@ -55,50 +56,32 @@ exports.login = (req, res) => {
       res.status(401).json({ error: 'Invalid credentials' });
       return;
     }
-
-    // 로그인 성공 시 userid와 토큰 반환
-    const userData = {
-      userid: result[0].userid,
-    };
-
-    // 사용자의 토큰 생성 및 업데이트
-    const token = randomstring.generate(40);
-    connection.query('UPDATE users SET accesstoken = ? WHERE userid = ?', [token, userid], (updateErr, updateResult) => {
-      if (updateErr) {
-        console.error(updateErr);
-        res.status(500).json({ error: 'Error updating token' });
-        return;
-      }
-
-      userData.token = token; // 토큰을 userData에 추가
-
-      console.log('Login successful');
-      res.status(200).json(userData); // userid와 token 반환
-    });
+    connection.query('UPDATE users SET accesstoken = ? WHERE userid = ?', [token, userid]);
+    console.log('Login successful');
+    res.status(200).json({ token });
   });
 };
 
 
 // 프로필 설정 엔드포인트 추가
 exports.setProfile = (req, res) => {
+  const { accesstoken } = req.body; // 클라이언트에서 전달한 토큰
   const { name, bias, weight, goal_weight } = req.body; // 클라이언트에서 전달한 프로필 정보
   const image = req.files && req.files.image; // 이미지 파일
-  const accesstoken = 'Bearer ' + req.user.accesstoken;
 
   const sql = 'UPDATE users SET name = ?, bias = ?, image = ?, weight = ?, goal_weight = ? WHERE accesstoken = ?';
-
   connection.query(sql, [name, bias, image, weight, goal_weight, accesstoken], (err, result) => {
     if (err) {
       console.error(err);
       res.status(500).json({ error: 'Error during login' });
       return;
     }
-    if (result.affectedRows === 0) {
+    if (result.length === 0) {
       res.status(401).json({ error: 'Invalid credentials' });
       return;
     }
     console.log('프로필 설정이 되었습니다.');
-    res.status(200).json({ message: 'profile set successfully' });
+    res.status(200).json({ message: 'profile set successfully'  });
   });
 };
 
