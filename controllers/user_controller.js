@@ -89,6 +89,33 @@ exports.setProfile = (req, res) => {
   });
 };
 
+// 프로필 상태 확인 라우트 핸들러
+exports.getProfileStatus = (req, res) => {
+  const { userid } = req.body; // 로그인한 사용자의 ID
+
+  // 여기에서 데이터베이스에서 사용자의 이름을 조회하여 가져옵니다.
+  // 예를 들어, MySQL 쿼리를 사용하여 이름을 가져올 수 있습니다.
+  const sql = 'SELECT name FROM users WHERE userid = ?';
+
+  connection.query(sql, [userid], (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Error retrieving user profile' });
+    }
+
+    const user = results[0];
+
+    if (user && user.name) {
+      // 사용자의 이름을 가져왔다면 클라이언트에게 보냅니다.
+      res.status(200).json({ profileStatus: 'complete', name: user.name });
+    } else {
+      // 사용자의 이름이 없다면 빈 이름을 클라이언트에게 보냅니다.
+      res.status(200).json({ profileStatus: 'incomplete', name: '' });
+    }
+  });
+};
+
+
 // 규칙 컨트롤러
 exports.rules = (req, res) => {
   const { userid, activity, exercise, activity_num, unit, count_min, count_max } = req.body;
