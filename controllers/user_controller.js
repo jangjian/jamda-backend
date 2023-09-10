@@ -27,9 +27,10 @@ exports.signup = (req, res) => {
   });
 };
 
-// 로그인 컨트롤러 수정
+// 로그인 컨트롤러
 exports.login = (req, res) => {
   const { userid, pw } = req.body;
+  var token = randomstring.generate(40);
   const sql = 'SELECT * FROM users WHERE userid = ? AND pw = ?';
   connection.query(sql, [userid, pw], (err, result) => {
     if (err) {
@@ -41,29 +42,16 @@ exports.login = (req, res) => {
       res.status(401).json({ error: 'Invalid credentials' });
       return;
     }
-
     // 로그인 성공 시 userid와 토큰 반환
     const userData = {
       userid: result[0].userid,
+      token : token
     };
-
-    // 사용자의 토큰 생성 및 업데이트
-    const token = randomstring.generate(40);
-    connection.query('UPDATE users SET accesstoken = ? WHERE userid = ?', [token, userid], (updateErr, updateResult) => {
-      if (updateErr) {
-        console.error(updateErr);
-        res.status(500).json({ error: 'Error updating token' });
-        return;
-      }
-
-      userData.token = token; // 토큰을 userData에 추가
-
-      console.log('Login successful');
-      res.status(200).json(userData); // userid와 token 반환
-    });
+    connection.query('UPDATE users SET accesstoken = ? WHERE userid = ?', [token, userid]);
+    console.log('Login successful');
+    res.status(200).json(userData);
   });
 };
-
 
 
 // 프로필 설정 엔드포인트 추가
