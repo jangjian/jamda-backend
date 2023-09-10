@@ -27,6 +27,20 @@ exports.signup = (req, res) => {
   });
 };
 
+// 아이디 중복 확인 컨트롤러
+exports.checkDuplicate = (req, res) => {
+  const { userid } = req.body;
+  const checkDuplicateSql = 'SELECT COUNT(*) AS count FROM users WHERE userid = ?';
+  connection.query(checkDuplicateSql, [userid], (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Error checking duplicate user' });
+      return;
+    }
+    res.status(200).json({ isDuplicate: result[0].count > 0 });
+  });
+};
+
 // 로그인 컨트롤러
 exports.login = (req, res) => {
   const { userid, pw } = req.body;
