@@ -91,7 +91,7 @@ exports.setProfile = (req, res) => {
 
 // 프로필 상태 확인 라우트 핸들러
 exports.getProfileStatus = (req, res) => {
-  const { userid, name } = req.body; // 로그인한 사용자의 ID
+  const { userid } = req.body; // 로그인한 사용자의 ID
 
   // 여기에서 데이터베이스에서 사용자의 이름을 조회하여 가져옵니다.
   // 예를 들어, MySQL 쿼리를 사용하여 이름을 가져올 수 있습니다.
@@ -103,7 +103,9 @@ exports.getProfileStatus = (req, res) => {
       return res.status(500).json({ error: 'Error retrieving user profile' });
     }
     
-    res.status(200).json({ name: name});
+    // 사용자의 이름을 JSON 응답에 추가
+    const user = results[0];
+    res.status(200).json({ name: user.name });
   });
 };
 
