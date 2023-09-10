@@ -93,9 +93,9 @@ exports.setProfile = (req, res) => {
 exports.rules = (req, res) => {
   const { userid, activity, exercise, activity_num, unit, count_min, count_max } = req.body;
   const uuid = randomstring.generate(40);
-  const sql = 'INSERT INTO rules (uuid, userid, activity, exercise, activity_num, unit, count_min, count_max) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+  const sql = 'INSERT INTO rules (uuid, userid, activity, exercise, activity_num, unit, count_min, count_max, count) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
   
-  connection.query(sql, [uuid, userid, activity, exercise, activity_num, unit, count_min, count_max], (err, result) => {
+  connection.query(sql, [uuid, userid, activity, exercise, activity_num, unit, count_min, count_max, 0], (err, result) => {
       if (err) {
           console.error(err);
           return res.status(500).json({ error: 'Error adding rule' });
