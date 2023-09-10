@@ -42,14 +42,9 @@ exports.login = (req, res) => {
       res.status(401).json({ error: 'Invalid credentials' });
       return;
     }
-    // 로그인 성공 시 userid와 토큰 반환
-    const userData = {
-      userid: result[0].userid,
-      token : token
-    };
     connection.query('UPDATE users SET accesstoken = ? WHERE userid = ?', [token, userid]);
     console.log('Login successful');
-    res.status(200).json(userData);
+    res.status(200).json({ token });
   });
 };
 
