@@ -56,6 +56,7 @@ exports.login = (req, res) => {
       res.status(401).json({ error: 'Invalid credentials' });
       return;
     }
+
     connection.query('UPDATE users SET accesstoken = ? WHERE userid = ?', [token, userid]);
     console.log('Login successful');
     res.status(200).json({ token });
@@ -63,7 +64,7 @@ exports.login = (req, res) => {
 };
 
 
-// 프로필 설정 엔드포인트 추가
+// 시작 프로필 설정 엔드포인트 추가
 exports.setProfile = (req, res) => {
   const { accesstoken } = req.body; // 클라이언트에서 전달한 토큰
   const { name, bias, weight, goal_weight } = req.body; // 클라이언트에서 전달한 프로필 정보
@@ -90,31 +91,32 @@ exports.rules = (req, res) => {
   const { userid, activity, exercise, activity_num, unit, count_min, count_max } = req.body;
   const uuid = randomstring.generate(40);
   const sql = 'INSERT INTO rules (uuid, userid, activity, exercise, activity_num, unit, count_min, count_max) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+  
   connection.query(sql, [uuid, userid, activity, exercise, activity_num, unit, count_min, count_max], (err, result) => {
-    if (err) {
-      console.error(err);
-      res.status(500).json({ error: 'Error registering user' });
-      return;
-    }
-
-    console.log('규칙추가완료');
-
-    // 매일 자정에 count 값을 초기화하는 스케줄링
-    const resetCountCron = '0 0 * * *'; // 매일 자정에 실행
-    cron.schedule(resetCountCron, () => {
-      connection.query('UPDATE rules SET count = 0 WHERE uuid = ?', [uuid], (err, result) => {
-        if (err) {
+      if (err) {
           console.error(err);
-          return;
-        }
+          return res.status(500).json({ error: 'Error adding rule' });
+      }
 
-        console.log('Count reset successful');
+      console.log('규칙 추가 완료');
+
+      // 매일 자정에 count 값을 초기화하는 스케줄링
+      const resetCountCron = '0 0 * * *'; // 매일 자정에 실행
+      cron.schedule(resetCountCron, () => {
+          connection.query('UPDATE rules SET count = 0 WHERE uuid = ?', [uuid], (err, result) => {
+              if (err) {
+                  console.error(err);
+                  return;
+              }
+
+              console.log('Count reset successful');
+          });
       });
-    });
 
-    res.status(200).json({ message: '규칙 추가 완료' });
+      return res.status(200).json({ message: '규칙 추가 완료' });
   });
 };
+
 
 // 운동량 누적 컨트롤러
 exports.increaseCount = (req, res)=> {
