@@ -81,7 +81,6 @@ exports.login = (req, res) => {
 
 // 프로필 설정 엔드포인트 추가
 exports.setProfile = (req, res) => {
-  const { accesstoken } = req.body; // 클라이언트에서 전달한 토큰
   const { name, bias, weight, goal_weight } = req.body; // 클라이언트에서 전달한 프로필 정보
   const image = req.files && req.files.image; // 이미지 파일
 
