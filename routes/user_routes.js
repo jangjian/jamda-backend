@@ -10,7 +10,7 @@ router.post('/signup', userController.signup);
 router.post('/check-duplicate', userController.checkDuplicate);
 
 // 로그인 라우트
-router.post('/login', getUser, userController.login);
+router.post('/login', userController.login);
 
 // 로그아웃 라우트 (DELETE)
 router.delete('/logout', userController.logout);
