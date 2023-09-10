@@ -56,10 +56,14 @@ exports.login = (req, res) => {
       res.status(401).json({ error: 'Invalid credentials' });
       return;
     }
-
+    
+    const userData = {
+      userid: result[0].userid,
+      token : token
+    };
     connection.query('UPDATE users SET accesstoken = ? WHERE userid = ?', [token, userid]);
     console.log('Login successful');
-    res.status(200).json({ token });
+    res.status(200).json(userData);
   });
 };
 
