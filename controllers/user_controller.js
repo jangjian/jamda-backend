@@ -83,10 +83,9 @@ exports.login = (req, res) => {
 exports.setProfile = (req, res) => {
   const { name, bias, weight, goal_weight } = req.body; // 클라이언트에서 전달한 프로필 정보
   const image = req.files && req.files.image; // 이미지 파일
+  const accesstoken = 'Bearer ' + req.user.accesstoken;
 
   const sql = 'UPDATE users SET name = ?, bias = ?, image = ?, weight = ?, goal_weight = ? WHERE accesstoken = ?';
-
-  const accesstoken = 'Bearer ' + req.user.accesstoken;
 
   connection.query(sql, [name, bias, image, weight, goal_weight, accesstoken], (err, result) => {
     if (err) {
