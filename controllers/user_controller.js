@@ -41,7 +41,7 @@ exports.checkDuplicate = (req, res) => {
   });
 };
 
-// 로그인 컨트롤러
+// 로그인 컨트롤러에서
 exports.login = (req, res) => {
   const { userid, pw } = req.body;
   var token = randomstring.generate(40);
@@ -57,11 +57,15 @@ exports.login = (req, res) => {
       return;
     }
 
+    // 사용자 정보를 req.user에 저장
+    req.user = result[0];
+
     connection.query('UPDATE users SET accesstoken = ? WHERE userid = ?', [token, userid]);
     console.log('Login successful');
     res.status(200).json({ token });
   });
 };
+
 
 
 // 시작 프로필 설정 엔드포인트 추가
@@ -120,9 +124,6 @@ exports.rules = (req, res) => {
 // 프로필 상태 확인 라우트 핸들러
 exports.getProfileStatus = (req, res) => {
   const userId = req.user.id; // 로그인한 사용자의 ID
-
-  // 여기에서 데이터베이스에서 해당 사용자의 bias와 weight 값을 조회하여 확인할 수 있습니다.
-  // 예를 들어, MySQL 쿼리를 사용하여 확인할 수 있습니다.
   const sql = 'SELECT name, bias, weight, goal_weight FROM users WHERE userid = ?';
 
   connection.query(sql, [userId], (err, results) => {

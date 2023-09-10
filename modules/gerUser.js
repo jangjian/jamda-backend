@@ -30,4 +30,4 @@ const getUser = (req, res, next) => {
     });
 };
 
-exports.getUser = getUser;
+module.exports = getUser;
