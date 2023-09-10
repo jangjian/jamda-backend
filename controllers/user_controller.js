@@ -85,18 +85,21 @@ exports.setProfile = (req, res) => {
   const image = req.files && req.files.image; // 이미지 파일
 
   const sql = 'UPDATE users SET name = ?, bias = ?, image = ?, weight = ?, goal_weight = ? WHERE accesstoken = ?';
+
+  const accesstoken = 'Bearer ' + req.user.accesstoken;
+
   connection.query(sql, [name, bias, image, weight, goal_weight, accesstoken], (err, result) => {
     if (err) {
       console.error(err);
       res.status(500).json({ error: 'Error during login' });
       return;
     }
-    if (result.length === 0) {
+    if (result.affectedRows === 0) {
       res.status(401).json({ error: 'Invalid credentials' });
       return;
     }
     console.log('프로필 설정이 되었습니다.');
-    res.status(200).json({ message: 'profile set successfully'  });
+    res.status(200).json({ message: 'profile set successfully' });
   });
 };
 

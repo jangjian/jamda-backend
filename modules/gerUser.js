@@ -4,30 +4,24 @@ const connection = mysql.createConnection({
     user: 'jamda',
     password: '1011',
     database: 'jamda_db'
-});
+  });
 
-const getUser = (req, res, next) => {
-    const accessToken = req.headers.authorization; // 클라이언트에서 헤더에 넣은 토큰
-
-    if (!accessToken) {
-        return res.status(401).json({ message: 'Access token not provided' });
-    }
-
+const getUser = async (req, res, next) => {
     const sql = 'SELECT * FROM users WHERE accesstoken = ?';
-    connection.query(sql, [accessToken], (err, results) => {
+
+    connection.query(sql, [req.headers.authorization], (err, result) => {
         if (err) {
-            console.error(err);
-            return res.status(500).json({ error: 'Error retrieving user' });
+          console.error(err);
+          res.status(500).json({ error: 'Error registering user' });
+          return;
         }
-
-        if (results.length === 0) {
-            return res.status(404).json({ message: 'User not found' });
+        console.log('User registered successfully');
+        if (result) {
+            req.user = result;
+            next();
+        } else {
+            return res.status(404).json({ message: 'Users Not Found!' });
         }
-
-        // 사용자 정보를 요청 객체에 추가
-        req.user = results[0];
-        next();
     });
 };
-
 exports.getUser = getUser;
