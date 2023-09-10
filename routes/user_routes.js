@@ -37,7 +37,7 @@ router.post("/certificate", userController.certificate);
 router.post("/check-auth-code", userController.checkAuthCode);
 
 
-// router.get('/GetSearchList/:text', getUser, GetSearchList);
+router.get('/GetSearchList/:text', getUser, GetSearchList);
 
 
 

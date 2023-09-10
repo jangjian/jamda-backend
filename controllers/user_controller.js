@@ -68,11 +68,11 @@ exports.login = (req, res) => {
 // 프로필 설정 엔드포인트 추가
 exports.setProfile = (req, res) => {
   const { accesstoken } = req.body; // 클라이언트에서 전달한 토큰
-  const { name, bias, weight, height, goal_weight } = req.body; // 클라이언트에서 전달한 프로필 정보
+  const { name, bias, weight, goal_weight } = req.body; // 클라이언트에서 전달한 프로필 정보
   const image = req.files && req.files.image; // 이미지 파일
 
-  const sql = 'UPDATE users SET name = ?, bias = ?, image = ?, weight = ?, height = ?, goal_weight = ? WHERE accesstoken = ?';
-  connection.query(sql, [name, bias, image, weight, height, goal_weight, accesstoken], (err, result) => {
+  const sql = 'UPDATE users SET name = ?, bias = ?, image = ?, weight = ?, goal_weight = ? WHERE accesstoken = ?';
+  connection.query(sql, [name, bias, image, weight, goal_weight, accesstoken], (err, result) => {
     if (err) {
       console.error(err);
       res.status(500).json({ error: 'Error during login' });
@@ -86,72 +86,6 @@ exports.setProfile = (req, res) => {
     res.status(200).json({ message: 'profile set successfully'  });
   });
 };
-
-// // 토큰을 사용하여 사용자 식별
-// function identifyUserByToken(accesstoken, callback) {
-//   const identifyUserSql = 'SELECT * FROM users WHERE accesstoken = ?';
-//   connection.query(identifyUserSql, [accesstoken], (err, result) => {
-//     if (err) {
-//       console.error(err);
-//       return callback(err, null);
-//     }
-
-//     if (result.length > 0) {
-//       // 토큰을 사용하여 사용자 식별 성공
-//       return callback(null, result[0]);
-//     } else {
-//       // 토큰을 사용하여 사용자 식별 실패
-//       return callback(null, null);
-//     }
-//   });
-// }
-
-
-// // 프로필 업데이트 및 이미지 업로드
-// function updateProfileWithImage(accesstoken, name, bias, image, weight, height, goal_weight, callback) {
-//   if (image) {
-//     // 이미지 업로드 경로
-//     const uploadPath = path.join(__dirname, '..', 'public', image.name);
-
-//     // 이미지 파일을 업로드 경로로 저장
-//     image.mv(uploadPath, (err) => {
-//       if (err) {
-//         console.error(err);
-//         return callback(err, null);
-//       }
-
-//       // 이미지 업로드 후 프로필 정보 업데이트
-//       updateProfileAndImageInDB(accesstoken, name, bias, image.name, weight, height, goal_weight, callback);
-//     });
-//   } else {
-//     // 이미지 없이 프로필 정보만 업데이트
-//     updateProfileAndImageInDB(accesstoken, name, bias, null, weight, height, goal_weight, callback);
-//   }
-// }
-
-// // 데이터베이스 업데이트 로직
-// function updateProfileAndImageInDB(accesstoken, name, bias, imageName, weight, height, goal_weight, callback) {
-//   const updateProfileSql = 'UPDATE users SET name = ?, bias = ?, image = ?, weight = ?, height = ?, goal_weight = ? WHERE accesstoken = ?';
-//   connection.query(updateProfileSql, [name, bias, imageName, weight, height, goal_weight, accesstoken], (err, result) => {
-//     if (err) {
-//       console.error(err);
-//       return callback(err, null);
-//     }
-
-//     // 업데이트된 프로필 정보를 가져옴
-//     const updatedProfile = {
-//       accesstoken: accesstoken,
-//       name: name,
-//       bias: bias,
-//       image: imageName, // 이미지 파일명
-//       weight : weight,
-//       height : height,
-//       goal_weight : goal_weight,
-//     };
-
-//     callback(null, updatedProfile);
-//   });
-// }
 
 // 규칙 컨트롤러
 exports.rules = (req, res) => {
