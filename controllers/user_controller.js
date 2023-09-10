@@ -117,6 +117,31 @@ exports.rules = (req, res) => {
   });
 };
 
+// 프로필 상태 확인 라우트 핸들러
+exports.getProfileStatus = (req, res) => {
+  const userId = req.user.id; // 로그인한 사용자의 ID
+
+  // 여기에서 데이터베이스에서 해당 사용자의 bias와 weight 값을 조회하여 확인할 수 있습니다.
+  // 예를 들어, MySQL 쿼리를 사용하여 확인할 수 있습니다.
+  const sql = 'SELECT name, bias, weight, goal_weight FROM users WHERE userid = ?';
+
+  connection.query(sql, [userId], (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Error retrieving user profile' });
+    }
+
+    const user = results[0];
+
+    if (user && user.bias !== null && user.weight !== null) {
+      // 사용자의 bias와 weight 값이 모두 null이 아니라면 프로필 설정이 이미 완료된 상태
+      res.status(200).json({ profileStatus: 'complete' });
+    } else {
+      // 사용자의 bias 또는 weight 값 중 하나라도 null이라면 프로필 설정이 아직 완료되지 않은 상태
+      res.status(200).json({ profileStatus: 'incomplete' });
+    }
+  });
+};
 
 // 운동량 누적 컨트롤러
 exports.increaseCount = (req, res)=> {

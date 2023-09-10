@@ -21,6 +21,9 @@ router.delete('/leave', getUser,userController.leave);
 // 프로필 설정 라우트
 router.post("/setProfile", userController.setProfile);
 
+// 프로필 상태 확인 라우트
+router.post("/profileStatus", getUser, userController.getProfileStatus);
+
 // 규칙 추가 라우트 
 router.post("/rules", getUser,userController.rules);
 
