@@ -41,7 +41,7 @@ exports.checkDuplicate = (req, res) => {
   });
 };
 
-// 로그인 컨트롤러에서
+// 로그인 컨트롤러
 exports.login = (req, res) => {
   const { userid, pw } = req.body;
   var token = randomstring.generate(40);
@@ -57,15 +57,11 @@ exports.login = (req, res) => {
       return;
     }
 
-    // 사용자 정보를 req.user에 저장
-    req.user = result[0];
-
     connection.query('UPDATE users SET accesstoken = ? WHERE userid = ?', [token, userid]);
     console.log('Login successful');
     res.status(200).json({ token });
   });
 };
-
 
 
 // 시작 프로필 설정 엔드포인트 추가
@@ -121,28 +117,6 @@ exports.rules = (req, res) => {
   });
 };
 
-// 프로필 상태 확인 라우트 핸들러
-exports.getProfileStatus = (req, res) => {
-  const userId = req.user.id; // 로그인한 사용자의 ID
-  const sql = 'SELECT name, bias, weight, goal_weight FROM users WHERE userid = ?';
-
-  connection.query(sql, [userId], (err, results) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ error: 'Error retrieving user profile' });
-    }
-
-    const user = results[0];
-
-    if (user && user.bias !== null && user.weight !== null) {
-      // 사용자의 bias와 weight 값이 모두 null이 아니라면 프로필 설정이 이미 완료된 상태
-      res.status(200).json({ profileStatus: 'complete' });
-    } else {
-      // 사용자의 bias 또는 weight 값 중 하나라도 null이라면 프로필 설정이 아직 완료되지 않은 상태
-      res.status(200).json({ profileStatus: 'incomplete' });
-    }
-  });
-};
 
 // 운동량 누적 컨트롤러
 exports.increaseCount = (req, res)=> {
