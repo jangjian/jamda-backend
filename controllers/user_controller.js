@@ -110,7 +110,7 @@ exports.getProfileStatus = (req, res) => {
       res.status(200).json({ profileStatus: 'complete', name: user.name });
     } else {
       // 사용자의 이름이 없다면 빈 이름을 클라이언트에게 보냅니다.
-      res.status(200).json({ profileStatus: 'incomplete', name: '' });
+      res.status(200).json({ profileStatus: 'incomplete', name: '' , id : userid});
     }
   });
 };
