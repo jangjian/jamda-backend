@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/user_controller'); // 사용자 컨트롤러 가져오기
-const { getUser } = require('../modules/gerUser');
+const { getUser } = require('../modules/getUser');
 
 // 회원가입 라우트
 router.post('/signup', userController.signup);
@@ -16,13 +16,10 @@ router.post('/login', userController.login);
 router.delete('/logout', userController.logout);
 
 // 탈퇴 라우트 (DELETE)
-router.delete('/leave', getUser,userController.leave);
+// router.delete('/leave', getUser, userController.leave);
 
 // 프로필 설정 라우트
 router.post("/setProfile", userController.setProfile);
-
-// 라우트
-router.get("/getProfileStatus", userController.getProfileStatus);
 
 // 규칙 추가 라우트 
 router.post("/rules", userController.rules);
