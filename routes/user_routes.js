@@ -21,6 +21,9 @@ router.delete('/leave', getUser, userController.leave);
 // 프로필 설정 라우트
 router.post("/setProfile", getUser,userController.setProfile);
 
+// 프로필 수정 라우트
+router.post('/update-profile', getUser,userController.updateProfile);
+
 // 프로필 가져오는 라우트
 router.get("/getUserInfo", getUser,userController.getUserInfo);
 
@@ -29,6 +32,9 @@ router.get("/getUserInfo", getUser,userController.getUserInfo);
 
 // 사용자 ID 변경 라우트
 router.post('/change-user-id', getUser, userController.changeUserId);
+
+// 사용자 PW 변경 라우트
+router.post('/change-password', getUser, userController.changePassword);
 
 // 규칙 추가 라우트 
 router.post("/rules", userController.rules);

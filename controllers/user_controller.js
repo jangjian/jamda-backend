@@ -67,26 +67,28 @@ exports.login = (req, res) => {
   });
 };
 
-// exports.hasProfile = (req, res) => {
-//   const { accesstoken } = req.user;
+exports.hasProfile = (req, res) => {
+  const { accesstoken } = req.user;
 
-//   const getUserInfoSql = 'SELECT name FROM users WHERE accesstoken = ?';
-//   connection.query(getUserInfoSql, [accesstoken], (err, result) => {
-//     if (err) {
-//       console.error(err);
-//       res.status(500).json({ error: 'Error fetching user information' });
-//       return;
-//     }
+  const getUserInfoSql = 'SELECT name FROM users WHERE accesstoken = ?';
+  connection.query(getUserInfoSql, [accesstoken], (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Error fetching user information' });
+      return;
+    }
 
-//     if (result.length === 0 || !result[0].name) {
-//       // name 값이 존재하지 않으면 hasProfile을 0으로 설정
-//       res.status(200).json({ hasProfile: 1 });
-//     } else {
-//       // name 값이 존재하면 hasProfile을 1로 설정
-//       res.status(200).json({ hasProfile: 0 });
-//     }
-//   });
-// };
+    if (result.length === 0 || !result[0].name) {
+      // name 값이 존재하지 않으면 hasProfile을 0으로 설정
+      res.status(200).json({ hasProfile: 1 });
+    } else {
+      // name 값이 존재하면 hasProfile을 1로 설정
+      res.status(200).json({ hasProfile: 0 });
+    }
+  });
+};
+
+
 
 // 시작 프로필 설정 컨트롤러
 exports.setProfile = (req, res) => {
@@ -124,6 +126,48 @@ exports.setProfile = (req, res) => {
     res.status(200).json({ message: 'Profile set successfully' });
   });
 };
+
+// 프로필 수정 컨트롤러
+exports.updateProfile = (req, res) => {
+  const { accesstoken } = req.user;
+  const { name, bias, weight, goal_weight } = req.body;
+  const image = req.files && req.files.image;
+
+  // 이미지 파일 업로드 및 경로 얻기 (사용하는 라이브러리에 따라 다를 수 있음)
+  let imagePath = null;
+  if (image) {
+    const imageName = `profile_${accesstoken}_${Date.now()}.jpg`;
+    imagePath = `/path/to/upload/folder/${imageName}`;
+    image.mv(imagePath, (err) => {
+      if (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error uploading image' });
+        return;
+      }
+    });
+  }
+
+  // SQL 쿼리 수정: 이미지 파일 경로를 포함하여 업데이트
+  const updateProfileSql = 'UPDATE users SET name = ?, bias = ?, image = ?, weight = ?, goal_weight = ? WHERE accesstoken = ?';
+  connection.query(
+    updateProfileSql,
+    [name, bias, imagePath, weight, goal_weight, accesstoken],
+    (err, result) => {
+      if (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error during profile update' });
+        return;
+      }
+      if (result.affectedRows === 0) {
+        res.status(401).json({ error: 'Invalid credentials' });
+        return;
+      }
+      console.log('프로필이 성공적으로 업데이트되었습니다.');
+      res.status(200).json({ message: '프로필이 성공적으로 업데이트되었습니다.' });
+    }
+  );
+};
+
 
 // 프로필 정보를 가져오는 컨트롤러 
 exports.getUserInfo = (req, res) => {
@@ -316,6 +360,39 @@ exports.changeUserId = (req, res) => {
   });
 };
 
+// 비밀번호 변경 컨트롤러
+exports.changePassword = (req, res) => {
+  const { accesstoken } = req.user;
+  const {currentPassword, newPassword} = req.body;
+
+  // 현재 비밀번호가 일치하는지 확인
+  const checkCurrentPasswordSql = 'SELECT * FROM users WHERE accesstoken = ? AND pw = ?';
+  connection.query(checkCurrentPasswordSql, [accesstoken, currentPassword], (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: '비밀번호 변경 중 오류가 발생했습니다.' });
+      return;
+    }
+
+    if (result.length === 0) {
+      res.status(401).json({ error: '현재 비밀번호가 일치하지 않습니다.' });
+      return;
+    }
+
+    // 비밀번호를 새로운 비밀번호로 업데이트
+    const updatePasswordSql = 'UPDATE users SET pw = ? WHERE accesstoken = ?';
+    connection.query(updatePasswordSql, [newPassword, accesstoken], (updateErr, updateResult) => {
+      if (updateErr) {
+        console.error(updateErr);
+        res.status(500).json({ error: '비밀번호 변경 중 오류가 발생했습니다.' });
+        return;
+      }
+
+      console.log('비밀번호가 성공적으로 변경되었습니다.');
+      res.status(200).json({ message: '비밀번호가 성공적으로 변경되었습니다.' });
+    });
+  });
+};
 
 // 이메일 인증 코드 요청 컨트롤러
 exports.certificate = async (req, res) => {
