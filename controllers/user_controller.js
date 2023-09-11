@@ -22,7 +22,6 @@ exports.signup = (req, res) => {
       res.status(500).json({ error: 'Error registering user' });
       return;
     }
-    console.log('User registered successfully');
     res.status(200).json({ message: 'User registered successfully' });
   });
 };
@@ -69,23 +68,62 @@ exports.login = (req, res) => {
 
 // 시작 프로필 설정 엔드포인트 추가
 exports.setProfile = (req, res) => {
-  const { accesstoken } = req.body; // 클라이언트에서 전달한 토큰
+  const { accesstoken } = req.user; // 클라이언트에서 전달한 토큰
   const { name, bias, weight, goal_weight } = req.body; // 클라이언트에서 전달한 프로필 정보
   const image = req.files && req.files.image; // 이미지 파일
 
+  // 이미지 파일 업로드 및 경로 얻기 (사용하는 라이브러리에 따라 다를 수 있음)
+  let imagePath = null;
+  if (image) {
+    const imageName = `profile_${accesstoken}_${Date.now()}.jpg`; // 파일 이름 생성
+    imagePath = `/path/to/upload/folder/${imageName}`; // 이미지 파일 경로
+    image.mv(imagePath, (err) => {
+      if (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error uploading image' });
+        return;
+      }
+    });
+  }
+
+  // SQL 쿼리 수정: 이미지 파일 경로를 포함하여 업데이트
   const sql = 'UPDATE users SET name = ?, bias = ?, image = ?, weight = ?, goal_weight = ? WHERE accesstoken = ?';
-  connection.query(sql, [name, bias, image, weight, goal_weight, accesstoken], (err, result) => {
+  connection.query(sql, [name, bias, imagePath, weight, goal_weight, accesstoken], (err, result) => {
     if (err) {
       console.error(err);
-      res.status(500).json({ error: 'Error during login' });
+      res.status(500).json({ error: 'Error during profile update' });
       return;
     }
-    if (result.length === 0) {
+    if (result.affectedRows === 0) {
       res.status(401).json({ error: 'Invalid credentials' });
       return;
     }
     console.log('프로필 설정이 되었습니다.');
-    res.status(200).json({ message: 'profile set successfully'  });
+    res.status(200).json({ message: 'Profile set successfully' });
+  });
+};
+
+
+exports.getUserInfo = (req, res) => {
+  const { accesstoken } = req.user;
+
+  // 사용자 정보를 가져옵니다.
+  const getUserInfoSql = 'SELECT name FROM users WHERE accesstoken = ?';
+  connection.query(getUserInfoSql, [accesstoken], (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Error fetching user information' });
+      return;
+    }
+
+    if (result.length === 0) {
+      res.status(401).json({ error: 'User not found' });
+      return;
+    }
+    
+    // 사용자 이름을 클라이언트에 반환합니다.
+    const userName = result[0].name;
+    res.status(200).json({ name: userName });
   });
 };
 
