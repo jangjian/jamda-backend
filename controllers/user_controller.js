@@ -58,15 +58,37 @@ exports.login = (req, res) => {
     
     const userData = {
       userid: result[0].userid,
-      token : token
+      token: token
     };
+
     connection.query('UPDATE users SET accesstoken = ? WHERE userid = ?', [token, userid]);
     console.log('Login successful');
     res.status(200).json(userData);
   });
 };
 
-// 시작 프로필 설정 엔드포인트 추가
+// exports.hasProfile = (req, res) => {
+//   const { accesstoken } = req.user;
+
+//   const getUserInfoSql = 'SELECT name FROM users WHERE accesstoken = ?';
+//   connection.query(getUserInfoSql, [accesstoken], (err, result) => {
+//     if (err) {
+//       console.error(err);
+//       res.status(500).json({ error: 'Error fetching user information' });
+//       return;
+//     }
+
+//     if (result.length === 0 || !result[0].name) {
+//       // name 값이 존재하지 않으면 hasProfile을 0으로 설정
+//       res.status(200).json({ hasProfile: 1 });
+//     } else {
+//       // name 값이 존재하면 hasProfile을 1로 설정
+//       res.status(200).json({ hasProfile: 0 });
+//     }
+//   });
+// };
+
+// 시작 프로필 설정 컨트롤러
 exports.setProfile = (req, res) => {
   const { accesstoken } = req.user; // 클라이언트에서 전달한 토큰
   const { name, bias, weight, goal_weight } = req.body; // 클라이언트에서 전달한 프로필 정보
@@ -103,12 +125,12 @@ exports.setProfile = (req, res) => {
   });
 };
 
-
+// 프로필 정보를 가져오는 컨트롤러 
 exports.getUserInfo = (req, res) => {
   const { accesstoken } = req.user;
 
   // 사용자 정보를 가져옵니다.
-  const getUserInfoSql = 'SELECT name FROM users WHERE accesstoken = ?';
+  const getUserInfoSql = 'SELECT name, bias, weight, goal_weight FROM users WHERE accesstoken = ?';
   connection.query(getUserInfoSql, [accesstoken], (err, result) => {
     if (err) {
       console.error(err);
@@ -123,7 +145,10 @@ exports.getUserInfo = (req, res) => {
     
     // 사용자 이름을 클라이언트에 반환합니다.
     const userName = result[0].name;
-    res.status(200).json({ name: userName });
+    const userBias = result[0].bias;
+    const userWeight = result[0].weight;
+    const userGoal_weight = result[0].goal_weight;
+    res.status(200).json({ name: userName, bias : userBias, weight : userWeight, goal_weight : userGoal_weight });
   });
 };
 
@@ -273,6 +298,24 @@ exports.leave = (req, res) => {
     res.status(200).json({ message: 'Account deleted successfully' });
   });
 };
+
+// ID 변경 컨트롤러
+exports.changeUserId = (req, res) => {
+  const { accesstoken } = req.user;
+  const { userid } = req.body;
+
+  // 새로운 사용자 ID로 업데이트
+  const updateUserIdSql = 'UPDATE users SET userid = ? WHERE accesstoken = ?';
+  connection.query(updateUserIdSql, [userid, accesstoken], (err, updateResult) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Error updating user ID' });
+      return;
+    }
+    res.status(200).json({ message: '사용자 ID가 성공적으로 변경되었습니다.' });
+  });
+};
+
 
 // 이메일 인증 코드 요청 컨트롤러
 exports.certificate = async (req, res) => {
