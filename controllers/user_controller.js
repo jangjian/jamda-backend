@@ -13,10 +13,13 @@ const connection = mysql.createConnection({
 
 // 회원가입 컨트롤러
 exports.signup = (req, res) => {
-  const { userid, pw, email } = req.body; // 인증코드(authCode) 추가
-  
-  const sql = 'INSERT INTO users (userid, pw, email) VALUES (?, ?, ?)';
-  connection.query(sql, [userid, pw, email], (err, result) => {
+  const { userid, pw, email } = req.body;
+
+  // 현재 날짜를 가져옵니다.
+  const currentDate = new Date();
+
+  const sql = 'INSERT INTO users (userid, pw, email, registration_date) VALUES (?, ?, ?, ?)';
+  connection.query(sql, [userid, pw, email, currentDate], (err, result) => {
     if (err) {
       console.error(err);
       res.status(500).json({ error: 'Error registering user' });
@@ -169,12 +172,11 @@ exports.updateProfile = (req, res) => {
 };
 
 
-// 프로필 정보를 가져오는 컨트롤러 
 exports.getUserInfo = (req, res) => {
   const { accesstoken } = req.user;
 
   // 사용자 정보를 가져옵니다.
-  const getUserInfoSql = 'SELECT name, bias, weight, goal_weight FROM users WHERE accesstoken = ?';
+  const getUserInfoSql = 'SELECT name, bias, weight, goal_weight, registration_date FROM users WHERE accesstoken = ?';
   connection.query(getUserInfoSql, [accesstoken], (err, result) => {
     if (err) {
       console.error(err);
@@ -186,15 +188,35 @@ exports.getUserInfo = (req, res) => {
       res.status(401).json({ error: 'User not found' });
       return;
     }
-    
-    // 사용자 이름을 클라이언트에 반환합니다.
+
+    // 사용자의 가입 날짜를 가져옵니다.
+    const registrationDate = result[0].registration_date;
+
+    // 현재 날짜를 가져옵니다.
+    const currentDate = new Date();
+
+    // 날짜 차이를 계산합니다.
+    const timeDifference = currentDate - registrationDate;
+
+    // 밀리초를 일로 변환합니다 (1일 = 24시간 * 60분 * 60초 * 1000밀리초)
+    const daysDifference = Math.floor(timeDifference / (24 * 60 * 60 * 1000)) + 1;
+
+    // 사용자 정보 및 일 단위로 표시된 날짜 차이를 클라이언트에 반환합니다.
     const userName = result[0].name;
     const userBias = result[0].bias;
     const userWeight = result[0].weight;
-    const userGoal_weight = result[0].goal_weight;
-    res.status(200).json({ name: userName, bias : userBias, weight : userWeight, goal_weight : userGoal_weight });
+    const userGoalWeight = result[0].goal_weight;
+    
+    res.status(200).json({
+      name: userName,
+      bias: userBias,
+      weight: userWeight,
+      goal_weight: userGoalWeight,
+      daysSinceRegistration: daysDifference
+    });
   });
 };
+
 
 
 // 규칙 컨트롤러
