@@ -13,19 +13,19 @@ router.post('/check-duplicate', userController.checkDuplicate);
 router.post('/login', userController.login);
 
 // 로그아웃 라우트 (DELETE)
-router.delete('/logout', userController.logout);
+router.post('/logout', getUser, userController.logout);
 
 // 탈퇴 라우트 (DELETE)
-router.delete('/leave', getUser, userController.leave);
+router.post('/leave', getUser, userController.leave);
 
 // 프로필 설정 라우트
-router.post("/setProfile", getUser,userController.setProfile);
+router.post("/setProfile", getUser, userController.setProfile);
 
 // 프로필 수정 라우트
-router.post('/update-profile', getUser,userController.updateProfile);
+router.post('/update-profile', getUser, userController.updateProfile);
 
 // 프로필 가져오는 라우트
-router.get("/getUserInfo", getUser,userController.getUserInfo);
+router.get("/getUserInfo", getUser, userController.getUserInfo);
 
 // 프로필 상태 라우트
 // router.get('/hasProfile', getUser, userController.hasProfile);
