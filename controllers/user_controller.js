@@ -43,67 +43,55 @@ exports.checkDuplicate = (req, res) => {
   });
 };
 
-// 로그인 컨트롤러
+
 exports.login = (req, res) => {
   const { userid, pw } = req.body;
-  var token = randomstring.generate(40);
+  const token = randomstring.generate(40); // 새로운 토큰 생성
+
   const sql = 'SELECT * FROM users WHERE userid = ? AND pw = ?';
   connection.query(sql, [userid, pw], (err, result) => {
     if (err) {
       console.error(err);
-      res.status(500).json({ error: 'Error during login' });
+      res.status(500).json({ error: '로그인 중 오류가 발생했습니다.' });
       return;
     }
     if (result.length === 0) {
-      res.status(401).json({ error: 'Invalid credentials' });
+      res.status(401).json({ error: '잘못된 자격 증명' });
       return;
     }
-    
+
     const userData = {
       userid: result[0].userid,
-      token: token
+      token: token,
+      hasProfile: result[0].hasProfile, // hasProfile 값을 반환
     };
 
-    connection.query('UPDATE users SET accesstoken = ? WHERE userid = ?', [token, userid]);
-    console.log('Login successful');
-    res.status(200).json(userData);
-  });
-};
+    // 사용자 정보에 토큰 업데이트
+    connection.query('UPDATE users SET accesstoken = ? WHERE userid = ?', [token, userid], (updateErr, updateResult) => {
+      if (updateErr) {
+        console.error(updateErr);
+        res.status(500).json({ error: '토큰 업데이트 중 오류가 발생했습니다.' });
+        return;
+      }
 
-exports.hasProfile = (req, res) => {
-  const { accesstoken } = req.user;
-
-  const getUserInfoSql = 'SELECT name FROM users WHERE accesstoken = ?';
-  connection.query(getUserInfoSql, [accesstoken], (err, result) => {
-    if (err) {
-      console.error(err);
-      res.status(500).json({ error: 'Error fetching user information' });
-      return;
-    }
-
-    if (result.length === 0 || !result[0].name) {
-      // name 값이 존재하지 않으면 hasProfile을 0으로 설정
-      res.status(200).json({ hasProfile: 1 });
-    } else {
-      // name 값이 존재하면 hasProfile을 1로 설정
-      res.status(200).json({ hasProfile: 0 });
-    }
+      res.status(200).json(userData);
+    });
   });
 };
 
 
 
-// 시작 프로필 설정 컨트롤러
+// 프로필 설정 컨트롤러
 exports.setProfile = (req, res) => {
-  const { accesstoken } = req.user; // 클라이언트에서 전달한 토큰
-  const { name, bias, weight, goal_weight } = req.body; // 클라이언트에서 전달한 프로필 정보
-  const image = req.files && req.files.image; // 이미지 파일
+  const { accesstoken } = req.user;
+  const { name, bias, weight, goal_weight } = req.body;
+  const image = req.files && req.files.image;
 
   // 이미지 파일 업로드 및 경로 얻기 (사용하는 라이브러리에 따라 다를 수 있음)
   let imagePath = null;
   if (image) {
-    const imageName = `profile_${accesstoken}_${Date.now()}.jpg`; // 파일 이름 생성
-    imagePath = `/path/to/upload/folder/${imageName}`; // 이미지 파일 경로
+    const imageName = `profile_${accesstoken}_${Date.now()}.jpg`;
+    imagePath = `/path/to/upload/folder/${imageName}`;
     image.mv(imagePath, (err) => {
       if (err) {
         console.error(err);
@@ -114,7 +102,7 @@ exports.setProfile = (req, res) => {
   }
 
   // SQL 쿼리 수정: 이미지 파일 경로를 포함하여 업데이트
-  const sql = 'UPDATE users SET name = ?, bias = ?, image = ?, weight = ?, goal_weight = ? WHERE accesstoken = ?';
+  const sql = 'UPDATE users SET name = ?, bias = ?, image = ?, weight = ?, goal_weight = ?, hasProfile = 1 WHERE accesstoken = ?';
   connection.query(sql, [name, bias, imagePath, weight, goal_weight, accesstoken], (err, result) => {
     if (err) {
       console.error(err);
@@ -126,9 +114,13 @@ exports.setProfile = (req, res) => {
       return;
     }
     console.log('프로필 설정이 되었습니다.');
+
+    // 프로필 설정이 완료되면 hasProfile 값을 업데이트합니다.
+    // hasProfile은 1로 설정됩니다.
     res.status(200).json({ message: 'Profile set successfully' });
   });
 };
+
 
 // 프로필 수정 컨트롤러
 exports.updateProfile = (req, res) => {
