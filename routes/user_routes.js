@@ -13,7 +13,7 @@ router.post('/check-duplicate', userController.checkDuplicate);
 router.post('/login', userController.login);
 
 // 로그아웃 라우트 (DELETE)
-router.post('/logout', getUser, userController.logout);
+router.post('/logout', userController.logout);
 
 // 탈퇴 라우트 (DELETE)
 router.post('/leave', getUser, userController.leave);

@@ -191,7 +191,7 @@ exports.getUserInfo = (req, res) => {
     const timeDifference = currentDate - registrationDate;
 
     // 밀리초를 일로 변환합니다 (1일 = 24시간 * 60분 * 60초 * 1000밀리초)
-    const daysDifference = Math.floor(timeDifference / (24 * 60 * 60 * 1000)) + 2;
+    const daysDifference = Math.floor(timeDifference / (24 * 60 * 60 * 1000)) + 1;
 
     // 사용자 정보 및 일 단위로 표시된 날짜 차이를 클라이언트에 반환합니다.
     const userName = result[0].name;
@@ -281,8 +281,6 @@ exports.Calendar = (req, res)=> {
 // 로그아웃 컨트롤러
 exports.logout = (req, res) => {
   const { userid } = req.body;
-
-  // 토큰을 데이터베이스에서 삭제 또는 무효화하는 작업 수행
   // 여기서는 예시로 데이터베이스에서 해당 사용자의 토큰을 삭제하는 로직을 사용
   connection.query('UPDATE users SET accesstoken = NULL WHERE userid = ?', [userid], (err, result) => {
     if (err) {
