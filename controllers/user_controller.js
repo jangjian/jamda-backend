@@ -281,6 +281,8 @@ exports.Calendar = (req, res)=> {
 // 로그아웃 컨트롤러
 exports.logout = (req, res) => {
   const { userid } = req.body;
+
+  // 토큰을 데이터베이스에서 삭제 또는 무효화하는 작업 수행
   // 여기서는 예시로 데이터베이스에서 해당 사용자의 토큰을 삭제하는 로직을 사용
   connection.query('UPDATE users SET accesstoken = NULL WHERE userid = ?', [userid], (err, result) => {
     if (err) {
@@ -404,6 +406,54 @@ exports.changePassword = (req, res) => {
       console.log('비밀번호가 성공적으로 변경되었습니다.');
       res.status(200).json({ message: '비밀번호가 성공적으로 변경되었습니다.' });
     });
+  });
+};
+
+// 아이디 찾기 컨트롤러
+exports.findUserId = (req, res) => {
+  const { email } = req.body;
+
+  // 이메일을 사용하여 사용자 아이디를 검색
+  const findUserIdSql = 'SELECT userid FROM users WHERE email = ?';
+  connection.query(findUserIdSql, [email], (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Error finding user ID' });
+      return;
+    }
+
+    // 결과에서 매치되는 레코드를 찾지 못하면 해당 이메일로 가입된 사용자가 없음
+    if (result.length === 0) {
+      res.status(404).json({ error: '해당 이메일로 가입된 사용자가 없습니다.' });
+      return;
+    }
+
+    // 사용자 아이디를 클라이언트에게 응답
+    const userId = result[0].userid;
+    res.status(200).json({ userId: userId });
+  });
+};
+
+// 비밀번호 찾기 컨트롤러
+exports.findPassword = (req, res) => {
+  const { userid, email } = req.body;
+
+  // 입력된 아이디와 이메일로 사용자를 검색
+  const findUserSql = 'SELECT * FROM users WHERE userid = ? AND email = ?';
+  connection.query(findUserSql, [userid, email], (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Error finding user' });
+      return;
+    }
+
+    // 결과에서 매치되는 레코드를 찾지 못하면 해당 아이디 또는 이메일로 가입된 사용자가 없음
+    if (result.length === 0) {
+      res.status(404).json({ error: '해당 아이디 또는 이메일로 가입된 사용자가 없습니다.' });
+      return;
+    }
+
+      res.status(200).json();
   });
 };
 
