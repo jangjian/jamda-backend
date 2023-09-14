@@ -40,30 +40,38 @@ exports.checkDuplicate = (req, res) => {
   });
 };
 
-// 로그인 컨트롤러
 exports.login = (req, res) => {
   const { userid, pw } = req.body;
-  var token = randomstring.generate(40);
+  const token = randomstring.generate(40); // 새로운 토큰 생성
+
   const sql = 'SELECT * FROM users WHERE userid = ? AND pw = ?';
   connection.query(sql, [userid, pw], (err, result) => {
     if (err) {
       console.error(err);
-      res.status(500).json({ error: 'Error during login' });
+      res.status(500).json({ error: '로그인 중 오류가 발생했습니다.' });
       return;
     }
     if (result.length === 0) {
-      res.status(401).json({ error: 'Invalid credentials' });
+      res.status(401).json({ error: '잘못된 자격 증명' });
       return;
     }
-    
+
     const userData = {
       userid: result[0].userid,
-      token: token
+      token: token,
+      hasProfile: result[0].hasProfile, // hasProfile 값을 반환
     };
 
-    connection.query('UPDATE users SET accesstoken = ? WHERE userid = ?', [token, userid]);
-    console.log('Login successful');
-    res.status(200).json(userData);
+    // 사용자 정보에 토큰 업데이트
+    connection.query('UPDATE users SET accesstoken = ? WHERE userid = ?', [token, userid], (updateErr, updateResult) => {
+      if (updateErr) {
+        console.error(updateErr);
+        res.status(500).json({ error: '토큰 업데이트 중 오류가 발생했습니다.' });
+        return;
+      }
+
+      res.status(200).json(userData);
+    });
   });
 };
 
