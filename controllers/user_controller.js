@@ -209,7 +209,40 @@ exports.getUserInfo = (req, res) => {
   });
 };
 
+// 규칙을 불러오는 컨트롤러
+exports.getRules = (req, res) => {
+  const { userid} = req.user;
+  // 사용자의 모든 규칙 정보를 가져옵니다.
+  const getRuleInfoSql = 'SELECT activity, exercise, activity_num, unit, count FROM rules WHERE userid = ?';
+  connection.query(getRuleInfoSql, [userid], (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Error fetching user information' });
+      return;
+    }
 
+    if (result.length === 0) {
+
+      res.status(401).json({ error: 'User not found' });
+      return;
+    }
+
+    const likeDo = result.map(row => row.activity);
+    const exerciseTitle = result.map(row => row.exercise);
+    const exerciseRule = result.map(row => row.activity_num);
+    const exerciseUnit = result.map(row => row.unit);
+    const baseExerCount = result.map(row => row.count);
+
+    // 결과를 JSON 형식으로 응답합니다.
+    res.status(200).json({
+      activity: likeDo,
+      exercise: exerciseTitle,
+      activityNum: exerciseRule,
+      unit: exerciseUnit,
+      count: baseExerCount
+    });
+  });
+};
 
 // 규칙 컨트롤러
 exports.rules = (req, res) => {
@@ -222,8 +255,6 @@ exports.rules = (req, res) => {
           console.error(err);
           return res.status(500).json({ error: 'Error adding rule' });
       }
-
-      console.log('규칙 추가 완료');
 
       // 매일 자정에 count 값을 초기화하는 스케줄링
       const resetCountCron = '0 0 * * *'; // 매일 자정에 실행
@@ -261,12 +292,10 @@ exports.increaseCount = (req, res)=> {
 
 // 캘린더 컨트롤러 (스탬프)
 exports.Calendar = (req, res)=> {
-  const { userid } = req.body;
-  const completedate = new Date();
-  const color = req.body.color; // 클라이언트에서 전송한 컬러 값
+  const { userid, color } = req.body;
 
-  const sql = 'INSERT INTO calendar (userid, completedate, color) VALUES (?, ?, ?)';
-  connection.query(sql, [userid, completedate, color], (err, result)=>{
+  const sql = 'UPDATE calendar SET color = ? WHERE userid = ?';
+  connection.query(sql, [color, userid], (err, result)=>{
     if (err) {
       console.error(err);
       res.status(500).json({ error: 'Error adding date to calendar' });
@@ -277,6 +306,29 @@ exports.Calendar = (req, res)=> {
     res.status(200).json({ message: 'Date added to calendar' });
   });
 };
+
+// 캘린더 컨트롤러 (스탬프) - color 값을 가져오는 컨트롤러
+exports.getCalendarColor = (req, res)=> {
+  const { userid } = req.body;
+
+  const sql = 'SELECT color FROM calendar WHERE userid = ?';
+  connection.query(sql, [userid], (err, result)=>{
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Error fetching calendar color' });
+      return;
+    }
+
+    if (result.length === 0) {
+      res.status(404).json({ error: 'Calendar color not found for the user' });
+      return;
+    }
+
+    const color = result[0].color;
+    res.status(200).json({ color: color });
+  });
+};
+
 
 // 로그아웃 컨트롤러
 exports.logout = (req, res) => {
