@@ -5,7 +5,7 @@ const randomstring = require('randomstring')
 const cron = require('node-cron');
 const nodemailer = require('nodemailer');
 const connection = mysql.createConnection({
-  host: '43.201.10.121',
+  host: '3.39.10.144',
   user: 'jamda',
   password: '1011',
   database: 'jamda_db'
