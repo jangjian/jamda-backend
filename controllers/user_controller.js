@@ -211,7 +211,7 @@ exports.getUserInfo = (req, res) => {
 exports.getRules = (req, res) => {
   const { userid} = req.user;
   // 사용자의 모든 규칙 정보를 가져옵니다.
-  const getRuleInfoSql = 'SELECT activity, exercise, activity_num, unit, count FROM rules WHERE userid = ?';
+  const getRuleInfoSql = 'SELECT activity, exercise, activity_num, unit,count_min,count_max, count,uuid FROM rules WHERE userid = ?';
   connection.query(getRuleInfoSql, [userid], (err, result) => {
     if (err) {
       console.error(err);
