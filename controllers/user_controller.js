@@ -166,7 +166,7 @@ exports.getUserInfo = (req, res) => {
   const { accesstoken } = req.user;
 
   // 사용자 정보를 가져옵니다.
-  const getUserInfoSql = 'SELECT name, bias, weight, goal_weight, registration_date FROM users WHERE accesstoken = ?';
+  const getUserInfoSql = 'SELECT name, bias, weight, goal_weight, dday FROM users WHERE accesstoken = ?';
   connection.query(getUserInfoSql, [accesstoken], (err, result) => {
     if (err) {
       console.error(err);
@@ -178,31 +178,32 @@ exports.getUserInfo = (req, res) => {
       res.status(401).json({ error: 'User not found' });
       return;
     }
+    // 매일 자정에 count 값을 초기화하는 스케줄링
+    const resetCountCron = '0 0 * * *'; // 매일 자정에 실행
+    cron.schedule(resetCountCron, () => {
+      connection.query('UPDATE users SET dday = dday + 1', [accesstoken], (err, result) => {
+          if (err) {
+              console.error(err);
+              return;
+          }
 
-    // 사용자의 가입 날짜를 가져옵니다.
-    const registrationDate = result[0].registration_date;
-
-    // 현재 날짜를 가져옵니다.
-    const currentDate = new Date();
-
-    // 날짜 차이를 계산합니다.
-    const timeDifference = currentDate - registrationDate;
-
-    // 밀리초를 일로 변환합니다 (1일 = 24시간 * 60분 * 60초 * 1000밀리초)
-    const daysDifference = Math.floor(timeDifference / (24 * 60 * 60 * 1000)) + 1;
+          console.log('Count reset successful');
+      });
+    });
 
     // 사용자 정보 및 일 단위로 표시된 날짜 차이를 클라이언트에 반환합니다.
     const userName = result[0].name;
     const userBias = result[0].bias;
     const userWeight = result[0].weight;
     const userGoalWeight = result[0].goal_weight;
+    const dday = result[0].dday + 1;
     
     res.status(200).json({
       name: userName,
       bias: userBias,
       weight: userWeight,
       goal_weight: userGoalWeight,
-      daysSinceRegistration: daysDifference
+      dday : dday
     });
   });
 };
@@ -211,7 +212,7 @@ exports.getUserInfo = (req, res) => {
 exports.getRules = (req, res) => {
   const { userid} = req.user;
   // 사용자의 모든 규칙 정보를 가져옵니다.
-  const getRuleInfoSql = 'SELECT activity, exercise, activity_num, unit,count_min,count_max, count,uuid FROM rules WHERE userid = ?';
+  const getRuleInfoSql = 'SELECT activity, exercise, activity_num, unit, count FROM rules WHERE userid = ?';
   connection.query(getRuleInfoSql, [userid], (err, result) => {
     if (err) {
       console.error(err);
@@ -229,8 +230,6 @@ exports.getRules = (req, res) => {
     const exerciseTitle = result.map(row => row.exercise);
     const exerciseRule = result.map(row => row.activity_num);
     const exerciseUnit = result.map(row => row.unit);
-    const count_min = result.map(row => row.count_min);
-    const count_max = result.map(row => row.count_max);
     const baseExerCount = result.map(row => row.count);
 
     // 결과를 JSON 형식으로 응답합니다.
@@ -239,8 +238,6 @@ exports.getRules = (req, res) => {
       exercise: exerciseTitle,
       activityNum: exerciseRule,
       unit: exerciseUnit,
-      count_min: count_min,
-      count_max: count_max,
       count: baseExerCount
     });
   });
