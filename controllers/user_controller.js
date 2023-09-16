@@ -44,7 +44,7 @@ exports.checkDuplicate = (req, res) => {
   });
 };
 
-
+// 로그인 컨트롤러
 exports.login = (req, res) => {
   const { userid, pw } = req.body;
   const token = randomstring.generate(40); // 새로운 토큰 생성
@@ -79,8 +79,6 @@ exports.login = (req, res) => {
     });
   });
 };
-
-
 
 // 프로필 설정 컨트롤러
 exports.setProfile = (req, res) => {
@@ -121,7 +119,6 @@ exports.setProfile = (req, res) => {
     res.status(200).json({ message: 'Profile set successfully' });
   });
 };
-
 
 // 프로필 수정 컨트롤러
 exports.updateProfile = (req, res) => {
@@ -298,7 +295,6 @@ exports.deleteRule = (req, res) => {
   });
 };
 
-
 // 운동량 누적 컨트롤러
 exports.increaseCount = (req, res)=> {
   const {uuid} = req.body;
@@ -350,7 +346,7 @@ exports.Calendar = (req, res)=> {
 
 // 캘린더 컨트롤러 (스탬프) - color 값을 가져오는 컨트롤러
 exports.getCalendarColor = (req, res)=> {
-  const { userid } = req.body;
+  const { userid } = req.user;
 
   const sql = 'SELECT color FROM calendar WHERE userid = ?';
   connection.query(sql, [userid], (err, result)=>{
@@ -369,7 +365,6 @@ exports.getCalendarColor = (req, res)=> {
     res.status(200).json({ color: color });
   });
 };
-
 
 // 로그아웃 컨트롤러
 exports.logout = (req, res) => {
