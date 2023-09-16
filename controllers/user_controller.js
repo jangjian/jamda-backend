@@ -214,33 +214,20 @@ exports.getRules = (req, res) => {
   const { userid} = req.user;
   // 사용자의 모든 규칙 정보를 가져옵니다.
   const getRuleInfoSql = 'SELECT activity, exercise, activity_num, unit, count FROM rules WHERE userid = ?';
-  connection.query(getRuleInfoSql, [userid], (err, result) => {
+  connection.query(getRuleInfoSql, [userid], (err, results) => {
     if (err) {
       console.error(err);
       res.status(500).json({ error: 'Error fetching user information' });
       return;
     }
 
-    if (result.length === 0) {
-
+    if (results.length === 0) {
       res.status(401).json({ error: 'User not found' });
       return;
     }
 
-    const likeDo = result.map(row => row.activity);
-    const exerciseTitle = result.map(row => row.exercise);
-    const exerciseRule = result.map(row => row.activity_num);
-    const exerciseUnit = result.map(row => row.unit);
-    const baseExerCount = result.map(row => row.count);
-
-    // 결과를 JSON 형식으로 응답합니다.
-    res.status(200).json({
-      activity: likeDo,
-      exercise: exerciseTitle,
-      activityNum: exerciseRule,
-      unit: exerciseUnit,
-      count: baseExerCount
-    });
+    // 결과를 JSON 배열 형식으로 응답합니다.
+    res.status(200).json(results);
   });
 };
 
@@ -325,7 +312,7 @@ exports.getCalendarColor = (req, res)=> {
     }
 
     const color = result[0].color;
-    res.status(200).json({ color: color });
+    res.status(200).json({ userid });
   });
 };
 
