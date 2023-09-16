@@ -229,6 +229,8 @@ exports.getRules = (req, res) => {
     const exerciseTitle = result.map(row => row.exercise);
     const exerciseRule = result.map(row => row.activity_num);
     const exerciseUnit = result.map(row => row.unit);
+    const count_min = result.map(row => row.count_min);
+    const count_max = result.map(row => row.count_max);
     const baseExerCount = result.map(row => row.count);
 
     // 결과를 JSON 형식으로 응답합니다.
@@ -237,6 +239,8 @@ exports.getRules = (req, res) => {
       exercise: exerciseTitle,
       activityNum: exerciseRule,
       unit: exerciseUnit,
+      count_min: count_min,
+      count_max: count_max,
       count: baseExerCount
     });
   });
