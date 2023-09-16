@@ -332,12 +332,13 @@ exports.decreaseCount = (req, res)=> {
   })
 }
 
+
 // 캘린더 컨트롤러 (스탬프)
 exports.Calendar = (req, res)=> {
   const { userid, color } = req.body;
 
-  const sql = 'UPDATE calendar SET color = ? WHERE userid = ?';
-  connection.query(sql, [color, userid], (err, result)=>{
+  const sql = 'INSERT INTO users (userid, color) VALUES (?, ?)';
+  connection.query(sql, [userid, color], (err, result)=>{
     if (err) {
       console.error(err);
       res.status(500).json({ error: 'Error adding date to calendar' });
