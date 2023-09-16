@@ -192,7 +192,7 @@ exports.getUserInfo = (req, res) => {
     const timeDifference = currentDate - registrationDate;
 
     // 밀리초를 일로 변환합니다 (1일 = 24시간 * 60분 * 60초 * 1000밀리초)
-    const daysDifference = Math.floor(timeDifference / (24 * 60 * 60 * 1000)) + 2;
+    const daysDifference = Math.floor(timeDifference / (24 * 60 * 60 * 1000)) + 1;
 
     // 사용자 정보 및 일 단위로 표시된 날짜 차이를 클라이언트에 반환합니다.
     const userName = result[0].name;
@@ -303,6 +303,22 @@ exports.deleteRule = (req, res) => {
 exports.increaseCount = (req, res)=> {
   const {uuid} = req.body;
   const sql = 'UPDATE rules SET count = count+1 WHERE uuid = ?;';
+  connection.query(sql, [uuid], (err, result)=>{
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Error registering user' });
+      return;
+    }
+
+    console.log('증가');
+    res.status(200).json({ message: '증가' });
+  })
+}
+
+// 운동량 감소 컨트롤러
+exports.decreaseCount = (req, res)=> {
+  const {uuid} = req.body;
+  const sql = 'UPDATE rules SET count = count-1 WHERE uuid = ?;';
   connection.query(sql, [uuid], (err, result)=>{
     if (err) {
       console.error(err);
@@ -616,5 +632,35 @@ exports.checkAuthCode = (req, res) => {
 
     // 인증 성공
     return res.status(200).json({ message: '인증번호가 확인되었습니다.' });
+  });
+};
+
+// 사용자의 규칙 중 count가 1 이상인 규칙 불러오기 컨트롤러
+exports.getUserRulesWithCount = (req, res) => {
+  const { userid } = req.user;
+
+  // 사용자의 규칙 중 count가 1 이상인 규칙들을 가져옵니다.
+  const getUserRulesSql = 'SELECT activity, exercise, activity_num, unit, count FROM rules WHERE userid = ? AND count >= 1';
+  connection.query(getUserRulesSql, [userid], (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: '사용자 규칙 불러오기 중 오류가 발생했습니다.' });
+      return;
+    }
+
+    const activity = result.map(row => row.activity);
+    const exercise = result.map(row => row.exercise);
+    const activity_num = result.map(row => row.activity_num);
+    const unit = result.map(row => row.unit);
+    const count = result.map(row => row.count);
+
+    // 결과를 JSON 형식으로 응답합니다.
+    res.status(200).json({
+      activity: activity,
+      exercise: exercise,
+      activityNum: activity_num,
+      unit: unit,
+      count: count
+    });
   });
 };
