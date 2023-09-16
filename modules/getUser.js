@@ -1,10 +1,10 @@
 const mysql = require('mysql2');
 const connection = mysql.createConnection({
-    host: '43.201.10.121',
+    host: '52.78.221.233',
     user: 'jamda',
     password: '1011',
     database: 'jamda_db'
-});
+  });
 
 const getUser = async (req, res, next) => {
   const sql = 'SELECT * FROM users WHERE accesstoken = ?';
