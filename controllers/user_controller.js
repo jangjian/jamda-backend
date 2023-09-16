@@ -192,7 +192,7 @@ exports.getUserInfo = (req, res) => {
     const timeDifference = currentDate - registrationDate;
 
     // 밀리초를 일로 변환합니다 (1일 = 24시간 * 60분 * 60초 * 1000밀리초)
-    const daysDifference = Math.floor(timeDifference / (24 * 60 * 60 * 1000)) + 1;
+    const daysDifference = Math.floor(timeDifference / (24 * 60 * 60 * 1000)) + 2;
 
     // 사용자 정보 및 일 단위로 표시된 날짜 차이를 클라이언트에 반환합니다.
     const userName = result[0].name;
