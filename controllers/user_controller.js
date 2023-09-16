@@ -11,6 +11,7 @@ const connection = mysql.createConnection({
   database: 'jamda_db'
 });
 
+
 // 회원가입 컨트롤러
 exports.signup = (req, res) => {
   const { userid, pw, email } = req.body;
@@ -163,7 +164,7 @@ exports.updateProfile = (req, res) => {
   );
 };
 
-
+// 사용자의 정보를 가져오는 컨트롤러
 exports.getUserInfo = (req, res) => {
   const { accesstoken } = req.user;
 
@@ -214,20 +215,33 @@ exports.getRules = (req, res) => {
   const { userid} = req.user;
   // 사용자의 모든 규칙 정보를 가져옵니다.
   const getRuleInfoSql = 'SELECT activity, exercise, activity_num, unit, count FROM rules WHERE userid = ?';
-  connection.query(getRuleInfoSql, [userid], (err, results) => {
+  connection.query(getRuleInfoSql, [userid], (err, result) => {
     if (err) {
       console.error(err);
       res.status(500).json({ error: 'Error fetching user information' });
       return;
     }
 
-    if (results.length === 0) {
+    if (result.length === 0) {
+
       res.status(401).json({ error: 'User not found' });
       return;
     }
 
-    // 결과를 JSON 배열 형식으로 응답합니다.
-    res.status(200).json(results);
+    const likeDo = result.map(row => row.activity);
+    const exerciseTitle = result.map(row => row.exercise);
+    const exerciseRule = result.map(row => row.activity_num);
+    const exerciseUnit = result.map(row => row.unit);
+    const baseExerCount = result.map(row => row.count);
+
+    // 결과를 JSON 형식으로 응답합니다.
+    res.status(200).json({
+      activity: likeDo,
+      exercise: exerciseTitle,
+      activityNum: exerciseRule,
+      unit: exerciseUnit,
+      count: baseExerCount
+    });
   });
 };
 
@@ -257,6 +271,30 @@ exports.rules = (req, res) => {
       });
 
       return res.status(200).json({ message: '규칙 추가 완료' });
+  });
+};
+
+// 규칙 삭제 컨트롤러
+exports.deleteRule = (req, res) => {
+  const { userid, uuid } = req.body;
+
+  // 사용자 ID와 규칙 UUID를 기반으로 규칙을 삭제합니다.
+  const deleteRuleSql = 'DELETE FROM rules WHERE userid = ? AND uuid = ?';
+  connection.query(deleteRuleSql, [userid, uuid], (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Error deleting rule' });
+      return;
+    }
+
+    // 삭제된 행이 없으면 해당 UUID에 대한 규칙이 없는 것입니다.
+    if (result.affectedRows === 0) {
+      res.status(404).json({ error: '해당 UUID에 대한 규칙을 찾을 수 없습니다.' });
+      return;
+    }
+
+    // 삭제 성공
+    res.status(200).json({ message: '규칙이 성공적으로 삭제되었습니다.' });
   });
 };
 
@@ -312,7 +350,7 @@ exports.getCalendarColor = (req, res)=> {
     }
 
     const color = result[0].color;
-    res.status(200).json({ userid });
+    res.status(200).json({ color: color });
   });
 };
 
