@@ -18,10 +18,9 @@ exports.signup = (req, res) => {
 
   // 현재 날짜를 가져옵니다.
   const currentDate = new Date();
-  ddday = currentDate.getDate();
 
   const sql = 'INSERT INTO users (userid, pw, email, registration_date) VALUES (?, ?, ?, ?)';
-  connection.query(sql, [userid, pw, email, ddday], (err, result) => {
+  connection.query(sql, [userid, pw, email, currentDate], (err, result) => {
     if (err) {
       console.error(err);
       res.status(500).json({ error: 'Error registering user' });
