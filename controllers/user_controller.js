@@ -339,16 +339,39 @@ exports.decreaseCount = (req, res)=> {
 exports.Calendar = (req, res)=> {
   const { userid, color } = req.body;
 
-  const sql = 'INSERT INTO calendar (userid, color) VALUES (?, ?)';
-  connection.query(sql, [userid, color], (err, result)=>{
-    if (err) {
-      console.error(err);
-      res.status(500).json({ error: 'Error adding date to calendar' });
-      return;
+  // 이미 해당 사용자의 컬러 값이 있는지 확인
+  const checkColorSql = 'SELECT COUNT(*) AS count FROM calendar WHERE userid = ?';
+  connection.query(checkColorSql, [userid], (checkErr, checkResult) => {
+    if (checkErr) {
+      console.error(checkErr);
+      return res.status(500).json({ error: '컬러 확인 중 오류가 발생했습니다.' });
     }
 
-    console.log('Date added to calendar');
-    res.status(200).json({ message: 'Date added to calendar' });
+    if (checkResult[0].count === 0) {
+      // 해당 사용자에 대한 컬러 값이 아직 없으므로 새로 추가
+      const insertColorSql = 'INSERT INTO calendar (userid, color) VALUES (?, ?)';
+      connection.query(insertColorSql, [userid, color], (insertErr, insertResult) => {
+        if (insertErr) {
+          console.error(insertErr);
+          return res.status(500).json({ error: '컬러 추가 중 오류가 발생했습니다.' });
+        }
+
+        console.log('새로운 컬러 추가');
+        res.status(200).json({ message: '새로운 컬러가 추가되었습니다.' });
+      });
+    } else {
+      // 이미 해당 사용자에 대한 컬러 값이 있는 경우, 컬러 값을 업데이트
+      const updateColorSql = 'UPDATE calendar SET color = ? WHERE userid = ?';
+      connection.query(updateColorSql, [color, userid], (updateErr, updateResult) => {
+        if (updateErr) {
+          console.error(updateErr);
+          return res.status(500).json({ error: '컬러 업데이트 중 오류가 발생했습니다.' });
+        }
+
+        console.log('컬러 업데이트');
+        res.status(200).json({ message: '컬러가 업데이트되었습니다.' });
+      });
+    }
   });
 };
 
