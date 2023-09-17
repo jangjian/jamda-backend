@@ -743,6 +743,7 @@ exports.getUserRulesWithCount = (req, res) => {
       exercise: exercise,
       activityNum: activity_num,
       unit: unit,
+      count: count,
       count_min: count_min,
       count_max: count_max,
       uuid : uuid
