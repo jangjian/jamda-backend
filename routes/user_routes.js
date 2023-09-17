@@ -49,7 +49,7 @@ router.post("/getAllRulesByUuid",userController.getAllRulesByUuid);
 router.get("/getColor",getUser, userController.getCalendarColor);
 
 // 완료된 날짜 불러오는 라우트 
-router.post("/getCompleteDate",getUser,userController.getCompleteDate);
+router.get("/getCompleteDate",getUser,userController.getCompleteDate);
 
 // 카운트 증가 추가 라우트 
 router.post("/increaseCount", userController.increaseCount);
