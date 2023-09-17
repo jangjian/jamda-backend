@@ -339,7 +339,7 @@ exports.decreaseCount = (req, res)=> {
 exports.Calendar = (req, res)=> {
   const { userid, color } = req.body;
 
-  const sql = 'INSERT INTO users (userid, color) VALUES (?, ?)';
+  const sql = 'INSERT INTO calendar (userid, color) VALUES (?, ?)';
   connection.query(sql, [userid, color], (err, result)=>{
     if (err) {
       console.error(err);
