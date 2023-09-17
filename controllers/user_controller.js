@@ -388,6 +388,38 @@ exports.decreaseCount = (req, res)=> {
   })
 }
 
+// 운동량 누적 컨트롤러
+exports.today_increaseCount = (req, res)=> {
+  const {uuid} = req.body;
+  const sql = 'UPDATE rules SET today_count = today_count+1 WHERE uuid = ?;';
+  connection.query(sql, [uuid], (err, result)=>{
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Error registering user' });
+      return;
+    }
+
+    console.log('증가');
+    res.status(200).json({ message: '증가' });
+  })
+}
+
+// 운동량 감소 컨트롤러
+exports.today_decreaseCount = (req, res)=> {
+  const {uuid} = req.body;
+  const sql = 'UPDATE rules SET today_count = today_count-1 WHERE uuid = ?;';
+  connection.query(sql, [uuid], (err, result)=>{
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Error registering user' });
+      return;
+    }
+
+    console.log('증가');
+    res.status(200).json({ message: '증가' });
+  })
+}
+
 // 캘린더 컨트롤러
 exports.calendar = (req, res) => {
   const { userid } = req.body;
