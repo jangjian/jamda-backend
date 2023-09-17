@@ -42,6 +42,9 @@ router.post("/rules", userController.rules);
 // 규칙 불러오기 라우트 
 router.get("/getRules",getUser, userController.getRules);
 
+// 규칙 불러오기(uuid) 라우트 
+router.post("/getAllRulesByUuid",userController.getAllRulesByUuid);
+
 // 규칙 추가 라우트 
 router.get("/getColor",getUser, userController.getCalendarColor);
 

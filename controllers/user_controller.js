@@ -249,6 +249,44 @@ exports.getRules = (req, res) => {
   });
 };
 
+// "uuid" 값을 사용하여 모든 규칙을 불러오는 컨트롤러
+exports.getAllRulesByUuid = (req, res) => {
+  const { uuid } = req.body; // 요청에서 "uuid" 값을 받아옵니다.
+
+  // 해당 "uuid"에 연관된 모든 규칙 정보를 데이터베이스에서 가져옵니다.
+  const getRulesByUuidSql = 'SELECT activity, exercise, activity_num, unit, count, uuid FROM rules WHERE uuid = ?';
+  connection.query(getRulesByUuidSql, [uuid], (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: '규칙 불러오기 중 오류가 발생했습니다.' });
+      return;
+    }
+
+    if (result.length === 0) {
+      res.status(404).json({ error: '해당 UUID에 연관된 규칙을 찾을 수 없습니다.' });
+      return;
+    }
+
+    const activity = result.map(row => row.activity);
+    const exercise = result.map(row => row.exercise);
+    const activity_num = result.map(row => row.activity_num);
+    const unit = result.map(row => row.unit);
+    const count = result.map(row => row.count);
+    const uuids = result.map(row => row.uuid);
+
+    // 결과를 JSON 형식으로 응답합니다.
+    res.status(200).json({
+      activity: activity,
+      exercise: exercise,
+      activityNum: activity_num,
+      unit: unit,
+      count: count,
+      uuid: uuids
+    });
+  });
+};
+
+
 // 규칙 컨트롤러
 exports.rules = (req, res) => {
   const { userid, activity, exercise, activity_num, unit, count_min, count_max } = req.body;
