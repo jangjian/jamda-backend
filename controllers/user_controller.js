@@ -17,7 +17,7 @@ exports.signup = (req, res) => {
   const { userid, pw, email } = req.body;
 
   // 현재 날짜를 가져옵니다.
-  const currentDate = new Date().getDate();
+  const currentDate = new Date();
 
   const sql = 'INSERT INTO users (userid, pw, email, registration_date) VALUES (?, ?, ?, ?)';
   connection.query(sql, [userid, pw, email, currentDate], (err, result) => {
