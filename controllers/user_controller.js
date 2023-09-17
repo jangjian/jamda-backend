@@ -330,6 +330,31 @@ exports.deleteRule = (req, res) => {
   });
 };
 
+// 규칙 수정 컨트롤러
+exports.updateRules = (req, res) => {
+  const { uuid } = req.body;
+  const { activity, exercise, activity_num, unit, count_min, count_max } = req.body;
+
+  // SQL 쿼리 수정: 이미지 파일 경로를 포함하여 업데이트
+  const updateProfileSql = 'UPDATE rules SET activity = ?, exercise = ?, activity_num = ?, unit = ?, count_min = ?, count_max = ? WHERE uuid = ?';
+  connection.query(
+    updateProfileSql,
+    [activity, exercise, activity_num, unit, count_min, count_max, uuid],
+    (err, result) => {
+      if (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error during rule update' });
+        return;
+      }
+      if (result.affectedRows === 0) {
+        res.status(401).json({ error: 'Invalid credentials' });
+        return;
+      }
+      console.log('규칙이 변경되었습니다.');
+      res.status(200).json({ message: '규칙이 변경되었습니다.' });
+    }
+  );
+};
 // 운동량 누적 컨트롤러
 exports.increaseCount = (req, res)=> {
   const {uuid} = req.body;
@@ -442,6 +467,7 @@ exports.getCalendarColor = (req, res)=> {
   });
 };
 
+// 날짜 불러오는 컨트롤러
 exports.getCompleteDate = (req, res) => {
   const { userid } = req.user;
 
@@ -466,7 +492,6 @@ exports.getCompleteDate = (req, res) => {
     res.status(200).json({ completedate: dayOfMonth });
   });
 };
-
 
 // 로그아웃 컨트롤러
 exports.logout = (req, res) => {
