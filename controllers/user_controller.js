@@ -463,9 +463,6 @@ exports.getCompleteDate = (req, res) => {
   });
 };
 
-
-
-
 // 로그아웃 컨트롤러
 exports.logout = (req, res) => {
   const { userid } = req.body;
