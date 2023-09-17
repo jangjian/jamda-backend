@@ -22,7 +22,9 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
+const app = express();
 
+app.use(fileUpload());
 // 회원가입 컨트롤러
 exports.signup = (req, res) => {
   const { userid, pw, email } = req.body;
