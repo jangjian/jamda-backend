@@ -212,7 +212,7 @@ exports.getUserInfo = (req, res) => {
 exports.getRules = (req, res) => {
   const { userid} = req.user;
   // 사용자의 모든 규칙 정보를 가져옵니다.
-  const getRuleInfoSql = 'SELECT activity, exercise, activity_num, count_min, count_max, unit, count FROM rules WHERE userid = ?';
+  const getRuleInfoSql = 'SELECT activity, exercise, activity_num, count_min, count_max, unit, count, uuid FROM rules WHERE userid = ?';
   connection.query(getRuleInfoSql, [userid], (err, result) => {
     if (err) {
       console.error(err);
@@ -233,6 +233,7 @@ exports.getRules = (req, res) => {
     const count_min = result.map(row => row.count_min);
     const count_max = result.map(row => row.count_max);
     const baseExerCount = result.map(row => row.count);
+    const uuid = result.map(row => row.uuid);
 
     // 결과를 JSON 형식으로 응답합니다.
     res.status(200).json({
@@ -242,7 +243,8 @@ exports.getRules = (req, res) => {
       unit: exerciseUnit,
       count_min: count_min,
       count_max: count_max,
-      count: baseExerCount
+      count: baseExerCount,
+      uuid : uuid
     });
   });
 };
@@ -278,11 +280,11 @@ exports.rules = (req, res) => {
 
 // 규칙 삭제 컨트롤러
 exports.deleteRule = (req, res) => {
-  const { userid, uuid } = req.body;
+  const { uuid } = req.body;
 
   // 사용자 ID와 규칙 UUID를 기반으로 규칙을 삭제합니다.
   const deleteRuleSql = 'DELETE FROM rules WHERE userid = ? AND uuid = ?';
-  connection.query(deleteRuleSql, [userid, uuid], (err, result) => {
+  connection.query(deleteRuleSql, [uuid], (err, result) => {
     if (err) {
       console.error(err);
       res.status(500).json({ error: 'Error deleting rule' });
@@ -641,7 +643,7 @@ exports.getUserRulesWithCount = (req, res) => {
   const { userid } = req.user;
 
   // 사용자의 규칙 중 count가 1 이상인 규칙들을 가져옵니다.
-  const getUserRulesSql = 'SELECT activity, exercise, activity_num, unit, count FROM rules WHERE userid = ? AND count >= 1';
+  const getUserRulesSql = 'SELECT activity, exercise, activity_num, unit, count, uuid FROM rules WHERE userid = ? AND count >= 1';
   connection.query(getUserRulesSql, [userid], (err, result) => {
     if (err) {
       console.error(err);
@@ -654,6 +656,7 @@ exports.getUserRulesWithCount = (req, res) => {
     const activity_num = result.map(row => row.activity_num);
     const unit = result.map(row => row.unit);
     const count = result.map(row => row.count);
+    const uuid = result.map(row => row.uuid);
 
     // 결과를 JSON 형식으로 응답합니다.
     res.status(200).json({
@@ -661,7 +664,8 @@ exports.getUserRulesWithCount = (req, res) => {
       exercise: exercise,
       activityNum: activity_num,
       unit: unit,
-      count: count
+      count: count,
+      uuid : uuid
     });
   });
 };
