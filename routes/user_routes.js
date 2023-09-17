@@ -45,6 +45,9 @@ router.get("/getRules",getUser, userController.getRules);
 // 규칙 불러오기(uuid) 라우트 
 router.post("/getAllRulesByUuid",userController.getAllRulesByUuid);
 
+// 규칙 삭제 라우트 
+router.post("/deleteRule",userController.deleteRule);
+
 // 규칙 추가 라우트 
 router.get("/getColor",getUser, userController.getCalendarColor);
 
