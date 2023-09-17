@@ -443,7 +443,7 @@ exports.getCompleteDate = (req, res) => {
   const { userid } = req.user;
 
   // 사용자의 completedate 및 username 가져오기
-  const getCompleteDateSql = 'SELECT DAY(completedate) AS day FROM calendar WHERE userid = ?';
+  const getCompleteDateSql = 'SELECT DAY(completedate) FROM calendar WHERE userid = ?';
   connection.query(getCompleteDateSql, [userid], (err, result) => {
     if (err) {
       console.error(err);
@@ -456,10 +456,10 @@ exports.getCompleteDate = (req, res) => {
       return;
     }
 
-    const { day } = result[0];
+    const completedate  = result[0];
 
     // 결과를 JSON 형식으로 응답합니다.
-    res.status(200).json({ completedate: day});
+    res.status(200).json({ completedate: completedate});
   });
 };
 
