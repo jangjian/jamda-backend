@@ -60,6 +60,9 @@ router.post("/increaseCount", userController.increaseCount);
 // 카운트 감소 추가 라우트 
 router.post("/decreaseCount", userController.decreaseCount);
 
+// 규칙 불러오기(uuid) 라우트 
+router.post("/getTodayCount",userController.getTodayCount);
+
 // 오늘의 목표 카운트 증가 추가 라우트 
 router.post("/today_increaseCount", userController.today_increaseCount);
 

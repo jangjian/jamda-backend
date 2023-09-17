@@ -420,8 +420,8 @@ exports.today_decreaseCount = (req, res)=> {
   })
 }
 
-// 사용자의 규칙 중 count가 1 이상인 규칙 불러오기 컨트롤러
-exports.getUserRulesWithCount = (req, res) => {
+// 오늘의 목표 카운트 값 불러오기
+exports.getTodayCount = (req, res) => {
   const { uuid } = req.body;
 
   // 사용자의 규칙 중 count가 1 이상인 규칙들을 가져옵니다.
