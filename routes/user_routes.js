@@ -48,6 +48,9 @@ router.post("/getAllRulesByUuid",userController.getAllRulesByUuid);
 // 규칙 추가 라우트 
 router.get("/getColor",getUser, userController.getCalendarColor);
 
+// 완료된 날짜 불러오는 라우트 
+router.get("/getCompleteDate",getUser, userController.getCompleteDate);
+
 // 카운트 증가 추가 라우트 
 router.post("/increaseCount", userController.increaseCount);
 
@@ -57,7 +60,7 @@ router.post("/decreaseCount", userController.decreaseCount);
 // count 수가 1 이상인 규칙 불러오는 라우트
 router.get("/getUserRulesWithCount", getUser,userController.getUserRulesWithCount);
 
-// 색깔 추가 라우트 
+// 날짜 추가 라우트 
 router.post("/dateCalendar", userController.calendar);
 
 // 색깔 추가 라우트 

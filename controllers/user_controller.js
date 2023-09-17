@@ -451,6 +451,32 @@ exports.getCalendarColor = (req, res)=> {
   });
 };
 
+// 컨트롤러 추가: 현재 로그인된 사용자의 completedate 가져오기
+exports.getCompleteDate = (req, res) => {
+  const { userid } = req.user;
+
+  // 사용자의 completedate 가져오기
+  const getCompleteDateSql = 'SELECT DAY(completedate) AS day FROM calendar WHERE userid = ?';
+  connection.query(getCompleteDateSql, [userid], (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Error fetching completedate' });
+      return;
+    }
+
+    if (result.length === 0) {
+      res.status(404).json({ error: 'Completedate not found for the user' });
+      return;
+    }
+
+    const completedate = result[0].completedate;
+
+    // 결과를 JSON 형식으로 응답합니다.
+    res.status(200).json({ completedate: completedate });
+  });
+};
+
+
 // 로그아웃 컨트롤러
 exports.logout = (req, res) => {
   const { userid } = req.body;
