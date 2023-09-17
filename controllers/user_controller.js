@@ -420,6 +420,30 @@ exports.today_decreaseCount = (req, res)=> {
   })
 }
 
+// 사용자의 규칙 중 count가 1 이상인 규칙 불러오기 컨트롤러
+exports.getUserRulesWithCount = (req, res) => {
+  const { uuid } = req.body;
+
+  // 사용자의 규칙 중 count가 1 이상인 규칙들을 가져옵니다.
+  const getUserRulesSql = 'SELECT today_count FROM rules WHERE uuid = ?';
+  connection.query(getUserRulesSql, [uuid], (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: '사용자 규칙 불러오기 중 오류가 발생했습니다.' });
+      return;
+    }
+
+    const today_count = result.map(row => row.today_count);
+    
+
+    // 결과를 JSON 형식으로 응답합니다.
+    res.status(200).json({
+      today_count: today_count,
+      
+    });
+  });
+};
+
 // 캘린더 컨트롤러
 exports.calendar = (req, res) => {
   const { userid } = req.body;
