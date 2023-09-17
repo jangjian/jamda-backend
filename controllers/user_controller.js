@@ -185,12 +185,18 @@ exports.getUserInfo = (req, res) => {
     const userBias = result[0].bias;
     const userWeight = result[0].weight;
     const userGoalWeight = result[0].goal_weight;
+    const registration_date = result[0].registration_date;
+
+    const currentDate = new Date();
+
+    const daysDifference = registration_date.getDate() - currentDate.getDate();
     
     res.status(200).json({
       name: userName,
       bias: userBias,
       weight: userWeight,
       goal_weight: userGoalWeight,
+      daysDifference : daysDifference
     });
   });
 };
@@ -438,6 +444,7 @@ exports.getCalendarColor = (req, res)=> {
   });
 };
 
+// 날짜 컨트롤러
 exports.getCompleteDate = (req, res) => {
   const { userid } = req.user;
 
