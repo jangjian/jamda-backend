@@ -365,7 +365,7 @@ exports.calendar = (req, res) => {
   // 현재 날짜를 가져옵니다.
   const currentDate = new Date();
 
-  const sql = 'INSERT INTO calendar (userid, completedate) VALUES (?, ?)';
+  const sql = 'INSERT INTO calendar_date (userid, completedate) VALUES (?, ?)';
   connection.query(sql, [userid, currentDate], (err, result) => {
     if (err) {
       console.error(err);
@@ -442,7 +442,7 @@ exports.getCompleteDate = (req, res) => {
   const { userid } = req.user;
 
   // 사용자의 completedate 가져오기
-  const getCompleteDateSql = 'SELECT completedate FROM calendar WHERE userid = ?';
+  const getCompleteDateSql = 'SELECT completedate FROM calendar_date WHERE userid = ?';
   connection.query(getCompleteDateSql, [userid], (err, result) => {
     if (err) {
       console.error(err);
@@ -511,6 +511,16 @@ exports.leave = (req, res) => {
     // 사용자 캘린더 데이터 삭제
     const deleteCalendarSql = 'DELETE FROM calendar WHERE userid = ?';
     connection.query(deleteCalendarSql, [userid], (err, result) => {
+      if (err) {
+        console.error(err);
+      } else {
+        console.log('User calendar data deleted successfully');
+      }
+    });
+
+    // 사용자 캘린더 데이터 삭제
+    const deleteCalendar_dateSql = 'DELETE FROM calendar_date WHERE userid = ?';
+    connection.query(deleteCalendar_dateSql, [userid], (err, result) => {
       if (err) {
         console.error(err);
       } else {
