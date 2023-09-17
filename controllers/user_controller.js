@@ -166,7 +166,7 @@ exports.getUserInfo = (req, res) => {
   const { accesstoken } = req.user;
 
   // 사용자 정보를 가져옵니다.
-  const getUserInfoSql = 'SELECT name, bias, weight, goal_weight FROM users WHERE accesstoken = ?';
+  const getUserInfoSql = 'SELECT name, bias, weight, goal_weight, previousWeight FROM users WHERE accesstoken = ?';
   connection.query(getUserInfoSql, [accesstoken], (err, result) => {
     if (err) {
       console.error(err);
@@ -179,18 +179,19 @@ exports.getUserInfo = (req, res) => {
       return;
     }
 
-
     // 사용자 정보 및 일 단위로 표시된 날짜 차이를 클라이언트에 반환합니다.
     const userName = result[0].name;
     const userBias = result[0].bias;
     const userWeight = result[0].weight;
     const userGoalWeight = result[0].goal_weight;
+    const previousWeight = result[0].previousWeight;
     
     res.status(200).json({
       name: userName,
       bias: userBias,
       weight: userWeight,
       goal_weight: userGoalWeight,
+      previousWeight: previousWeight,
     });
   });
 };
