@@ -101,8 +101,8 @@ exports.setProfile = (req, res) => {
   }
 
   // SQL 쿼리 수정: 이미지 파일 경로를 포함하여 업데이트
-  const sql = 'UPDATE users SET name = ?, bias = ?, image = ?, weight = ?, goal_weight = ?, hasProfile = 1 WHERE accesstoken = ?';
-  connection.query(sql, [name, bias, imagePath, weight, goal_weight, accesstoken], (err, result) => {
+  const sql = 'UPDATE users SET name = ?, bias = ?, image = ?, weight = ?, goal_weight = ?, previousWeight = ?, hasProfile = 1 WHERE accesstoken = ?';
+  connection.query(sql, [name, bias, imagePath, weight, goal_weight,weight, accesstoken], (err, result) => {
     if (err) {
       console.error(err);
       res.status(500).json({ error: 'Error during profile update' });
