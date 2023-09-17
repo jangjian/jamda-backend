@@ -4,27 +4,23 @@ const path = require('path');
 const randomstring = require('randomstring')
 const cron = require('node-cron');
 const nodemailer = require('nodemailer');
+const multer = require("multer");
 const connection = mysql.createConnection({
   host: '52.78.221.233',
   user: 'jamda',
   password: '1011',
   database: 'jamda_db'
 });
-const multer = require('multer'); // multer 미들웨어를 사용하기 위해 추가
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadPath); // 업로드 경로 설정
-  },
-  filename: function (req, file, cb) {
-    const imageName = `profile_${req.user.accesstoken}_${Date.now()}.jpg`;
-    cb(null, imageName); // 파일 이름 설정
+
+var storage = multer.diskStorage({
+  destination : function (req, file, cb){
+    const ext = path.extname(file.originalname);
+    cb(null, path.basename(file.originalname, ext) + "-" + Date.now() + ext);
   },
 });
-const upload = multer({ storage: storage });
 
-const app = express();
+var upload = multer({storage :storage});
 
-app.use(fileUpload());
 // 회원가입 컨트롤러
 exports.signup = (req, res) => {
   const { userid, pw, email } = req.body;
@@ -93,36 +89,32 @@ exports.login = (req, res) => {
   });
 };
 
-
-
-// 이미지 업로드 및 프로필 설정
-// 이미지 업로드 및 프로필 설정
-app.post('/setProfile', upload.single('image'), (req, res) => {
+// 프로필 설정 컨트롤러
+exports.setProfile = (req, res) => {
   const { accesstoken } = req.user;
   const { name, bias, weight, goal_weight } = req.body;
+  const image = '/uploads/${req.file.filename}';
 
-  const imagePath = req.file ? req.file.path : null; // 이미지 파일 경로
-
+  
   // SQL 쿼리 수정: 이미지 파일 경로를 포함하여 업데이트
-  const updateProfileSql = 'UPDATE users SET name = ?, bias = ?, image = ?, weight = ?, goal_weight = ? WHERE accesstoken = ?';
-  connection.query(
-    updateProfileSql,
-    [name, bias, imagePath, weight, goal_weight, accesstoken],
-    (err, result) => {
-      if (err) {
-        console.error(err);
-        res.status(500).json({ error: '프로필 업데이트 중 오류가 발생했습니다.' });
-        return;
-      }
-      if (result.affectedRows === 0) {
-        res.status(401).json({ error: '자격 증명이 유효하지 않습니다.' });
-        return;
-      }
-      console.log('프로필이 성공적으로 업데이트되었습니다.');
-      res.status(200).json({ message: '프로필이 성공적으로 업데이트되었습니다.' });
+  const sql = 'UPDATE users SET name = ?, bias = ?, image = ?, weight = ?, goal_weight = ?, previousWeight = ?, hasProfile = 1 WHERE accesstoken = ?';
+  connection.query(sql, [name, bias, image, weight, goal_weight,weight, accesstoken], (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Error during profile update' });
+      return;
     }
-  );
-});
+    if (result.affectedRows === 0) {
+      res.status(401).json({ error: 'Invalid credentials' });
+      return;
+    }
+    console.log('프로필 설정이 되었습니다.');
+
+    // 프로필 설정이 완료되면 hasProfile 값을 업데이트합니다.
+    // hasProfile은 1로 설정됩니다.
+    res.status(200).json({ message: 'Profile set successfully' });
+  });
+};
 
 // 프로필 수정 컨트롤러
 exports.updateProfile = (req, res) => {
@@ -360,7 +352,6 @@ exports.updateRules = (req, res) => {
     }
   );
 };
-
 // 운동량 누적 컨트롤러
 exports.increaseCount = (req, res)=> {
   const {uuid} = req.body;
