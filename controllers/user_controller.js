@@ -286,7 +286,6 @@ exports.getAllRulesByUuid = (req, res) => {
   });
 };
 
-
 // 규칙 컨트롤러
 exports.rules = (req, res) => {
   const { userid, activity, exercise, activity_num, unit, count_min, count_max } = req.body;
@@ -721,7 +720,7 @@ exports.getUserRulesWithCount = (req, res) => {
   const { userid } = req.user;
 
   // 사용자의 규칙 중 count가 1 이상인 규칙들을 가져옵니다.
-  const getUserRulesSql = 'SELECT activity, exercise, activity_num, unit, count, uuid FROM rules WHERE userid = ? AND count >= 1';
+  const getUserRulesSql = 'SELECT activity, exercise, activity_num, unit, count_min, count_max count, uuid FROM rules WHERE userid = ? AND count >= 1';
   connection.query(getUserRulesSql, [userid], (err, result) => {
     if (err) {
       console.error(err);
@@ -734,6 +733,8 @@ exports.getUserRulesWithCount = (req, res) => {
     const activity_num = result.map(row => row.activity_num);
     const unit = result.map(row => row.unit);
     const count = result.map(row => row.count);
+    const count_min = result.map(row => row.count_min);
+    const count_max = result.map(row => row.count_max);
     const uuid = result.map(row => row.uuid);
 
     // 결과를 JSON 형식으로 응답합니다.
@@ -742,7 +743,8 @@ exports.getUserRulesWithCount = (req, res) => {
       exercise: exercise,
       activityNum: activity_num,
       unit: unit,
-      count: count,
+      count_min: count_min,
+      count_max: count_max,
       uuid : uuid
     });
   });
