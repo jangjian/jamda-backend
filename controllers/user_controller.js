@@ -720,7 +720,7 @@ exports.getUserRulesWithCount = (req, res) => {
   const { userid } = req.user;
 
   // 사용자의 규칙 중 count가 1 이상인 규칙들을 가져옵니다.
-  const getUserRulesSql = 'SELECT activity, exercise, activity_num, unit, count_min, count_max count, uuid FROM rules WHERE userid = ? AND count >= 1';
+  const getUserRulesSql = 'SELECT activity, exercise, activity_num, unit, count_min, count_max, count, uuid FROM rules WHERE userid = ? AND count >= 1';
   connection.query(getUserRulesSql, [userid], (err, result) => {
     if (err) {
       console.error(err);
