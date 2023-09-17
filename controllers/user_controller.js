@@ -312,7 +312,7 @@ exports.deleteRule = (req, res) => {
   const { uuid } = req.body;
 
   // 사용자 ID와 규칙 UUID를 기반으로 규칙을 삭제합니다.
-  const deleteRuleSql = 'DELETE FROM rules WHERE userid = ? AND uuid = ?';
+  const deleteRuleSql = 'DELETE FROM rules WHERE uuid = ?';
   connection.query(deleteRuleSql, [uuid], (err, result) => {
     if (err) {
       console.error(err);
