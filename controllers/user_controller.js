@@ -242,7 +242,7 @@ exports.getAllRulesByUuid = (req, res) => {
   const { uuid } = req.body; // 요청에서 "uuid" 값을 받아옵니다.
 
   // 해당 "uuid"에 연관된 모든 규칙 정보를 데이터베이스에서 가져옵니다.
-  const getRulesByUuidSql = 'SELECT activity, exercise, activity_num, unit, count, uuid FROM rules WHERE uuid = ?';
+  const getRulesByUuidSql = 'SELECT activity, exercise, activity_num, unit, count_min, count_max,count, uuid FROM rules WHERE uuid = ?';
   connection.query(getRulesByUuidSql, [uuid], (err, result) => {
     if (err) {
       console.error(err);
@@ -259,6 +259,8 @@ exports.getAllRulesByUuid = (req, res) => {
     const exercise = result.map(row => row.exercise);
     const activity_num = result.map(row => row.activity_num);
     const unit = result.map(row => row.unit);
+    const count_min = result.map(row => row.count_min);
+    const count_max = result.map(row => row.count_max);
     const count = result.map(row => row.count);
     const uuid = result.map(row => row.uuid);
 
@@ -268,6 +270,8 @@ exports.getAllRulesByUuid = (req, res) => {
       exercise: exercise,
       activityNum: activity_num,
       unit: unit,
+      count_min: count_min,
+      count_max: count_max,
       count: count,
       uuid: uuid
     });
