@@ -166,7 +166,7 @@ exports.getUserInfo = (req, res) => {
   const { accesstoken } = req.user;
 
   // 사용자 정보를 가져옵니다.
-  const getUserInfoSql = 'SELECT name, bias, weight, goal_weight, dday FROM users WHERE accesstoken = ?';
+  const getUserInfoSql = 'SELECT name, bias, weight, goal_weight FROM users WHERE accesstoken = ?';
   connection.query(getUserInfoSql, [accesstoken], (err, result) => {
     if (err) {
       console.error(err);
@@ -178,32 +178,19 @@ exports.getUserInfo = (req, res) => {
       res.status(401).json({ error: 'User not found' });
       return;
     }
-    // 매일 자정에 count 값을 초기화하는 스케줄링
-    const resetCountCron = '0 0 * * *'; // 매일 자정에 실행
-    cron.schedule(resetCountCron, () => {
-      connection.query('UPDATE users SET dday = dday + 1', [accesstoken], (err, result) => {
-          if (err) {
-              console.error(err);
-              return;
-          }
 
-          console.log('Count reset successful');
-      });
-    });
 
     // 사용자 정보 및 일 단위로 표시된 날짜 차이를 클라이언트에 반환합니다.
     const userName = result[0].name;
     const userBias = result[0].bias;
     const userWeight = result[0].weight;
     const userGoalWeight = result[0].goal_weight;
-    const dday = result[0].dday + 1;
     
     res.status(200).json({
       name: userName,
       bias: userBias,
       weight: userWeight,
       goal_weight: userGoalWeight,
-      dday : dday
     });
   });
 };
