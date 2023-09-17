@@ -51,11 +51,17 @@ router.get("/getColor",getUser, userController.getCalendarColor);
 // 카운트 증가 추가 라우트 
 router.post("/increaseCount", userController.increaseCount);
 
+// 카운트 증가 추가 라우트 
+router.post("/decreaseCount", userController.decreaseCount);
+
 // count 수가 1 이상인 규칙 불러오는 라우트
 router.get("/getUserRulesWithCount", getUser,userController.getUserRulesWithCount);
 
-// 색깔 변경 라우트 
-router.post("/updateColor", userController.Calendar);
+// 색깔 추가 라우트 
+router.post("/dateCalendar", userController.calendar);
+
+// 색깔 추가 라우트 
+router.post("/updateColor", userController.calendarColor);
 
 // 인증번호 라우트 
 router.post("/certificate", userController.certificate);

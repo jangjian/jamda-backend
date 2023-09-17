@@ -372,9 +372,26 @@ exports.decreaseCount = (req, res)=> {
   })
 }
 
+// 캘린더 컨트롤러
+exports.calendar = (req, res) => {
+  const { userid } = req.body;
 
-// 캘린더 컨트롤러 (스탬프)
-exports.Calendar = (req, res)=> {
+  // 현재 날짜를 가져옵니다.
+  const currentDate = new Date();
+
+  const sql = 'INSERT INTO calendar (userid, completedate) VALUES (?, ?)';
+  connection.query(sql, [userid, currentDate], (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Error registering user' });
+      return;
+    }
+    res.status(200).json({ message: 'User registered successfully' });
+  });
+};
+
+// 색깔 추가 컨트롤러
+exports.calendarColor = (req, res)=> {
   const { userid, color } = req.body;
 
   // 이미 해당 사용자의 컬러 값이 있는지 확인
