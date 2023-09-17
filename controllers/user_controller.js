@@ -259,7 +259,7 @@ exports.getAllRulesByUuid = (req, res) => {
     const activity_num = result.map(row => row.activity_num);
     const unit = result.map(row => row.unit);
     const count = result.map(row => row.count);
-    const uuids = result.map(row => row.uuid);
+    const uuid = result.map(row => row.uuid);
 
     // 결과를 JSON 형식으로 응답합니다.
     res.status(200).json({
@@ -268,7 +268,7 @@ exports.getAllRulesByUuid = (req, res) => {
       activityNum: activity_num,
       unit: unit,
       count: count,
-      uuid: uuids
+      uuid: uuid
     });
   });
 };
@@ -442,12 +442,12 @@ exports.getCalendarColor = (req, res)=> {
 exports.getCompleteDate = (req, res) => {
   const { userid } = req.user;
 
-  // 사용자의 completedate 가져오기
+  // 사용자의 completedate 및 username 가져오기
   const getCompleteDateSql = 'SELECT DAY(completedate) AS day FROM calendar WHERE userid = ?';
   connection.query(getCompleteDateSql, [userid], (err, result) => {
     if (err) {
       console.error(err);
-      res.status(500).json({ error: 'Error fetching completedate' });
+      res.status(500).json({ error: 'Error fetching completedate and username' });
       return;
     }
 
@@ -456,12 +456,13 @@ exports.getCompleteDate = (req, res) => {
       return;
     }
 
-    const completedate = result[0].completedate;
+    const { day } = result[0];
 
     // 결과를 JSON 형식으로 응답합니다.
-    res.status(200).json({ completedate: completedate });
+    res.status(200).json({ completedate: day});
   });
 };
+
 
 
 // 로그아웃 컨트롤러
