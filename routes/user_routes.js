@@ -33,6 +33,9 @@ router.post('/change-user-id', getUser, userController.changeUserId);
 // 사용자 PW 변경 라우트
 router.post('/change-password', getUser, userController.changePassword);
 
+// 사용자 PW 변경 라우트
+router.post('/loginChangePassword', getUser, userController.loginChangePassword);
+
 // 아이디 찾기 라우트
 router.post('/findUserId', userController.findUserId);
 

@@ -614,6 +614,23 @@ exports.changePassword = (req, res) => {
   });
 };
 
+// 비밀번호 변경 컨트롤러
+exports.loginChangePassword = (req, res) => {
+  const { userid, newPassword } = req.body;
+
+    // 비밀번호를 새로운 비밀번호로 업데이트
+    const updatePasswordSql = 'UPDATE users SET pw = ? WHERE userid = ?';
+    connection.query(updatePasswordSql, [newPassword, userid], (updateErr, updateResult) => {
+      if (updateErr) {
+        console.error(updateErr);
+        res.status(500).json({ error: '비밀번호 변경 중 오류가 발생했습니다.' });
+        return;
+      }
+      console.log('비밀번호가 성공적으로 변경되었습니다.');
+      res.status(200).json({ message: '비밀번호가 성공적으로 변경되었습니다.' });
+  });
+};
+
 // 아이디 찾기 컨트롤러
 exports.findUserId = (req, res) => {
   const { email } = req.body;
