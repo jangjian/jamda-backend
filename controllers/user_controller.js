@@ -28,6 +28,9 @@ exports.signup = (req, res) => {
   // 현재 날짜를 가져옵니다.
   const currentDate = new Date();
 
+  // 현재 시간에 9시간을 더합니다 (시간대 조정)
+  currentDate.setHours(currentDate.getHours() + 9);
+
   const sql = 'INSERT INTO users (userid, pw, email, registration_date) VALUES (?, ?, ?, ?)';
   connection.query(sql, [userid, pw, email, currentDate], (err, result) => {
     if (err) {
