@@ -11,6 +11,7 @@ const connection = mysql.createConnection({
   password: '1011',
   database: 'jamda_db'
 });
+
 var storage = multer.diskStorage({
   destination : function (req, file, cb){
     const ext = path.extname(file.originalname);
@@ -18,6 +19,8 @@ var storage = multer.diskStorage({
   },
 });
 var upload = multer({storage :storage});
+
+
 // 회원가입 컨트롤러
 exports.signup = (req, res) => {
   const { userid, pw, email } = req.body;
@@ -35,6 +38,7 @@ exports.signup = (req, res) => {
     res.status(200).json({ message: 'User registered successfully' });
   });
 };
+
 // 아이디 중복 확인 컨트롤러
 exports.checkDuplicate = (req, res) => {
   const { userid } = req.body;
@@ -48,6 +52,7 @@ exports.checkDuplicate = (req, res) => {
     res.status(200).json({ isDuplicate: result[0].count > 0 });
   });
 };
+
 // 로그인 컨트롤러
 exports.login = (req, res) => {
   const { userid, pw } = req.body;
@@ -103,6 +108,7 @@ exports.setProfile = (req, res) => {
     res.status(200).json({ message: 'Profile set successfully' });
   });
 };
+
 // 프로필 수정 컨트롤러
 exports.updateProfile = (req, res) => {
   const { accesstoken } = req.user;
@@ -141,6 +147,7 @@ exports.updateProfile = (req, res) => {
     }
   );
 };
+
 // 사용자의 정보를 가져오는 컨트롤러
 exports.getUserInfo = (req, res) => {
   const { accesstoken } = req.user;
@@ -172,6 +179,7 @@ exports.getUserInfo = (req, res) => {
     });
   });
 };
+
 // 규칙을 불러오는 컨트롤러
 exports.getRules = (req, res) => {
   const { userid} = req.user;
@@ -208,6 +216,7 @@ exports.getRules = (req, res) => {
     });
   });
 };
+
 // "uuid" 값을 사용하여 모든 규칙을 불러오는 컨트롤러
 exports.getAllRulesByUuid = (req, res) => {
   const { uuid } = req.body; // 요청에서 "uuid" 값을 받아옵니다.
@@ -244,6 +253,29 @@ exports.getAllRulesByUuid = (req, res) => {
     });
   });
 };
+
+// 회원가입 날짜를 불러오는 컨트롤러
+exports.getDay = (req, res) => {
+  const { accesstoken } = req.user; 
+  const getDayByUuidSql = 'SELECT registration_date FROM users WHERE accesstoken = ?';
+  connection.query(getDayByUuidSql, [accesstoken], (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: '회원가입 날짜를 불러오던 중 오류가 발생했습니다.' });
+      return;
+    }
+    if (result.length === 0) {
+      res.status(404).json({ error: '해당 UUID에 연관된 규칙을 찾을 수 없습니다.' });
+      return;
+    }
+
+    const day = result[0].registration_date;
+    
+    // 결과를 JSON 형식으로 응답합니다.
+    res.status(200).json({registration_date: day,});
+  });
+};
+
 // 규칙 컨트롤러
 exports.rules = (req, res) => {
   const { userid, activity, exercise, activity_num, unit, count_min, count_max } = req.body;
@@ -269,6 +301,7 @@ exports.rules = (req, res) => {
       return res.status(200).json({ message: '규칙 추가 완료' });
   });
 };
+
 // 규칙 삭제 컨트롤러
 exports.deleteRule = (req, res) => {
   const { uuid } = req.body;
@@ -289,6 +322,7 @@ exports.deleteRule = (req, res) => {
     res.status(200).json({ message: '규칙이 성공적으로 삭제되었습니다.' });
   });
 };
+
 // 규칙 수정 컨트롤러
 exports.updateRules = (req, res) => {
   const { uuid } = req.body;
@@ -313,6 +347,7 @@ exports.updateRules = (req, res) => {
     }
   );
 };
+
 // 운동량 누적 컨트롤러
 exports.increaseCount = (req, res)=> {
   const {uuid} = req.body;
@@ -327,6 +362,7 @@ exports.increaseCount = (req, res)=> {
     res.status(200).json({ message: '증가' });
   })
 }
+
 // 운동량 감소 컨트롤러
 exports.decreaseCount = (req, res)=> {
   const {uuid} = req.body;
@@ -341,6 +377,7 @@ exports.decreaseCount = (req, res)=> {
     res.status(200).json({ message: '증가' });
   })
 }
+
 // 오늘의 목표 카운트 값 불러오기
 exports.getTodayCount = (req, res) => {
   const { uuid } = req.body;
@@ -361,20 +398,25 @@ exports.getTodayCount = (req, res) => {
     });
   });
 };
-// exports.today_count = (req, res) => {
-//   const { uuid, today_count } = req.body;
-//   // 현재 날짜를 가져옵니다.
-//   const currentDate = new Date();
-//   const sql = 'UPDATE rules SET today_count = ? WHERE uuid = ?';
-//   connection.query(sql, [today_count, uuid], (err, result) => {
-//     if (err) {
-//       console.error(err);
-//       res.status(500).json({ error: 'Error registering user' });
-//       return;
-//     }
-//     res.status(200).json({ message: 'User registered successfully' });
-//   });
-// };
+
+// 오늘의 목표 컨트롤러 
+exports.updateCounts = (req, res) => {
+  const updates = req.body.updates; 
+
+  const sql = 'UPDATE rules SET today_count = ? WHERE uuid = ?';
+
+  for (const update of updates) {
+    const { today_count, uuid } = update;
+    
+    connection.query(sql, [today_count, uuid], (err, result) => {
+      if (err) {
+        console.error(err);
+      }
+    });
+  }
+
+  res.status(200).json({ message: 'Updates completed successfully' });
+};
 // 캘린더 컨트롤러
 exports.calendar = (req, res) => {
   const { userid } = req.body;
@@ -388,6 +430,7 @@ exports.calendar = (req, res) => {
     res.status(200).json({ message: 'User registered successfully' });
   });
 };
+
 // 색깔 추가 컨트롤러
 exports.calendarColor = (req, res)=> {
   const { userid, color } = req.body;
@@ -423,6 +466,7 @@ exports.calendarColor = (req, res)=> {
     }
   });
 };
+
 // 캘린더 컨트롤러 (스탬프) - color 값을 가져오는 컨트롤러
 exports.getCalendarColor = (req, res)=> {
   const { userid } = req.user;
@@ -441,6 +485,7 @@ exports.getCalendarColor = (req, res)=> {
     res.status(200).json({ color: color });
   });
 };
+
 // 날짜 불러오는 컨트롤러
 exports.getCompleteDate = (req, res) => {
   const { userid } = req.user;
@@ -464,6 +509,7 @@ exports.getCompleteDate = (req, res) => {
   
   });
 };
+
 // 로그아웃 컨트롤러
 exports.logout = (req, res) => {
   const { userid } = req.body;
@@ -479,6 +525,7 @@ exports.logout = (req, res) => {
     res.status(200).json({ message: 'Logout successful' });
   });
 };
+
 // 탈퇴 컨트롤러
 exports.leave = (req, res) => {
   const { accesstoken } = req.user;
@@ -542,6 +589,7 @@ exports.leave = (req, res) => {
     res.status(200).json({ message: 'Account deleted successfully' });
   });
 };
+
 // ID 변경 컨트롤러
 exports.changeUserId = (req, res) => {
   const { accesstoken } = req.user;
@@ -557,6 +605,7 @@ exports.changeUserId = (req, res) => {
     res.status(200).json({ message: '사용자 ID가 성공적으로 변경되었습니다.' });
   });
 };
+
 // 비밀번호 변경 컨트롤러
 exports.changePassword = (req, res) => {
   const { accesstoken } = req.user;
@@ -586,6 +635,7 @@ exports.changePassword = (req, res) => {
     });
   });
 };
+
 // 아이디 찾기 컨트롤러
 exports.findUserId = (req, res) => {
   const { email } = req.body;
@@ -607,6 +657,7 @@ exports.findUserId = (req, res) => {
     res.status(200).json({ userId: userId });
   });
 };
+
 // 비밀번호 찾기 컨트롤러
 exports.findPassword = (req, res) => {
   const { userid, email } = req.body;
@@ -626,6 +677,7 @@ exports.findPassword = (req, res) => {
       res.status(200).json();
   });
 };
+
 // 이메일 인증 코드 요청 컨트롤러
 exports.certificate = async (req, res) => {
   const { email } = req.body;
@@ -679,6 +731,7 @@ exports.certificate = async (req, res) => {
     });
   });
 };
+
 // 인증번호 확인 함수
 exports.checkAuthCode = (req, res) => {
   const { email, code } = req.body;
@@ -701,6 +754,7 @@ exports.checkAuthCode = (req, res) => {
     return res.status(200).json({ message: '인증번호가 확인되었습니다.' });
   });
 };
+
 // 사용자의 규칙 중 count가 1 이상인 규칙 불러오기 컨트롤러
 exports.getUserRulesWithCount = (req, res) => {
   const { userid } = req.user;
