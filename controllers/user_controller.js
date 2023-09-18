@@ -355,6 +355,7 @@ exports.updateRules = (req, res) => {
     }
   );
 };
+
 // 운동량 누적 컨트롤러
 exports.increaseCount = (req, res)=> {
   const {uuid} = req.body;
@@ -434,6 +435,9 @@ exports.calendar = (req, res) => {
 
   // 현재 날짜를 가져옵니다.
   const currentDate = new Date();
+
+  // 현재 시간에 9시간을 더합니다 (시간대 조정)
+  currentDate.setHours(currentDate.getHours() + 9);
 
   const sql = 'INSERT INTO calendar_date (userid, completedate) VALUES (?, ?)';
   connection.query(sql, [userid, currentDate], (err, result) => {
