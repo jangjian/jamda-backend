@@ -152,7 +152,7 @@ exports.updateProfile = (req, res) => {
 exports.getUserInfo = (req, res) => {
   const { accesstoken } = req.user;
   // 사용자 정보를 가져옵니다.
-  const getUserInfoSql = 'SELECT name, bias, weight, goal_weight, previousWeight FROM users WHERE accesstoken = ?';
+  const getUserInfoSql = 'SELECT name, bias, weight, goal_weight, previousWeight, registration_date FROM users WHERE accesstoken = ?';
   connection.query(getUserInfoSql, [accesstoken], (err, result) => {
     if (err) {
       console.error(err);
@@ -169,6 +169,7 @@ exports.getUserInfo = (req, res) => {
     const userWeight = result[0].weight;
     const userGoalWeight = result[0].goal_weight;
     const previousWeight = result[0].previousWeight;
+    const registration_date = result[0].registration_date;
     
     res.status(200).json({
       name: userName,
@@ -176,6 +177,7 @@ exports.getUserInfo = (req, res) => {
       weight: userWeight,
       goal_weight: userGoalWeight,
       previousWeight: previousWeight,
+      registration_date: registration_date,
     });
   });
 };
@@ -251,28 +253,6 @@ exports.getAllRulesByUuid = (req, res) => {
       count: count,
       uuid: uuid
     });
-  });
-};
-
-// 회원가입 날짜를 불러오는 컨트롤러
-exports.getDay = (req, res) => {
-  const { accesstoken } = req.user; 
-  const getDayByUuidSql = 'SELECT registration_date FROM users WHERE accesstoken = ?';
-  connection.query(getDayByUuidSql, [accesstoken], (err, result) => {
-    if (err) {
-      console.error(err);
-      res.status(500).json({ error: '회원가입 날짜를 불러오던 중 오류가 발생했습니다.' });
-      return;
-    }
-    if (result.length === 0) {
-      res.status(404).json({ error: '해당 UUID에 연관된 규칙을 찾을 수 없습니다.' });
-      return;
-    }
-
-    const day = result[0].registration_date;
-    
-    // 결과를 JSON 형식으로 응답합니다.
-    res.status(200).json({registration_date: day,});
   });
 };
 

@@ -27,9 +27,6 @@ router.post('/update-profile', getUser, userController.updateProfile);
 // 프로필 가져오는 라우트
 router.get("/getUserInfo", getUser, userController.getUserInfo);
 
-// 규칙 불러오기 라우트 
-router.get("/getDay",getUser, userController.getDay);
-
 // 사용자 ID 변경 라우트
 router.post('/change-user-id', getUser, userController.changeUserId);
 
