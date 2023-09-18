@@ -24,10 +24,7 @@ var upload = multer({storage :storage});
 // 회원가입 컨트롤러
 exports.signup = (req, res) => {
   const { userid, pw, email } = req.body;
-  // 현재 날짜를 가져옵니다.
-  // const currentDate = new Date();
-  // 현재 시간에 9시간을 더합니다 (시간대 조정)
-  // currentDate.setHours(currentDate.getHours() + 9);
+
   const sql = 'INSERT INTO users (userid, pw, email, registration_date) VALUES (?, ?, ?,now())';
   connection.query(sql, [userid, pw, email], (err, result) => {
     if (err) {
@@ -84,6 +81,7 @@ exports.login = (req, res) => {
     });
   });
 };
+
 // 프로필 설정 컨트롤러
 exports.setProfile = (req, res) => {
   const { accesstoken } = req.user;
@@ -177,14 +175,14 @@ exports.getUserInfo = (req, res) => {
       weight: userWeight,
       goal_weight: userGoalWeight,
       previousWeight: previousWeight,
-      registration_date: registration_date,
+      registration_date: registration_date
     });
   });
 };
 
 // 규칙을 불러오는 컨트롤러
 exports.getRules = (req, res) => {
-  const { userid} = req.user;
+  const { userid } = req.user;
   // 사용자의 모든 규칙 정보를 가져옵니다.
   const getRuleInfoSql = 'SELECT activity, exercise, activity_num, count_min, count_max, unit, count, uuid FROM rules WHERE userid = ?';
   connection.query(getRuleInfoSql, [userid], (err, result) => {
