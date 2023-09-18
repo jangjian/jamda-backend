@@ -523,7 +523,6 @@ exports.getCompleteDate = (req, res) => {
       return;
     }
     const completedate = result.map(row => row.completedate);
-    const dayOfMonth = completedate.getDate(); // 날짜의 일 추출
 
     // 결과를 JSON 형식으로 응답합니다.
     res.status(200).json({ completedate: dayOfMonth });
