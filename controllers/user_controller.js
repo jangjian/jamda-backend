@@ -26,13 +26,13 @@ exports.signup = (req, res) => {
   const { userid, pw, email } = req.body;
 
   // 현재 날짜를 가져옵니다.
-  const currentDate = new Date();
+  // const currentDate = new Date();
 
   // 현재 시간에 9시간을 더합니다 (시간대 조정)
-  currentDate.setHours(currentDate.getHours() + 9);
+  // currentDate.setHours(currentDate.getHours() + 9);
 
-  const sql = 'INSERT INTO users (userid, pw, email, registration_date) VALUES (?, ?, ?, ?)';
-  connection.query(sql, [userid, pw, email, currentDate], (err, result) => {
+  const sql = 'INSERT INTO users (userid, pw, email, registration_date) VALUES (?, ?, ?,now())';
+  connection.query(sql, [userid, pw, email], (err, result) => {
     if (err) {
       console.error(err);
       res.status(500).json({ error: 'Error registering user' });
@@ -433,14 +433,14 @@ exports.getTodayCount = (req, res) => {
 exports.calendar = (req, res) => {
   const { userid } = req.body;
 
-  // 현재 날짜를 가져옵니다.
-  const currentDate = new Date();
+  // // 현재 날짜를 가져옵니다.
+  // const currentDate = new Date();
 
-  // 현재 시간에 9시간을 더합니다 (시간대 조정)
-  currentDate.setHours(currentDate.getHours() + 9);
+  // // 현재 시간에 9시간을 더합니다 (시간대 조정)
+  // currentDate.setHours(currentDate.getHours() + 9);
 
-  const sql = 'INSERT INTO calendar_date (userid, completedate) VALUES (?, ?)';
-  connection.query(sql, [userid, currentDate], (err, result) => {
+  const sql = 'INSERT INTO calendar_date (userid, completedate) VALUES (?, now())';
+  connection.query(sql, [userid], (err, result) => {
     if (err) {
       console.error(err);
       res.status(500).json({ error: 'Error registering user' });
