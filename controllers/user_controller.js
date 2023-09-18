@@ -525,7 +525,7 @@ exports.getCompleteDate = (req, res) => {
     const completedate = result.map(row => row.completedate);
 
     // 결과를 JSON 형식으로 응답합니다.
-    res.status(200).json({ completedate: dayOfMonth });
+    res.status(200).json({ completedate: completedate });
   });
 };
 
