@@ -529,8 +529,8 @@ exports.getCompleteDate = (req, res) => {
       res.status(404).json({ error: 'Completedate not found for the user' });
       return;
     }
-    const completedate = result.map(row => new Date(row.completedate).getDate());
-    console.log(result[0].completedate);
+    // const completedate = result.map(row => new Date(row.completedate).getDate());
+    const completedate = result.map(row => row.completedate);
 
     // 결과를 JSON 형식으로 응답합니다.
     res.status(200).json({ completedate: completedate });
