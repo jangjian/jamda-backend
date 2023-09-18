@@ -570,16 +570,37 @@ exports.leave = (req, res) => {
 
 // ID 변경 컨트롤러
 exports.changeUserId = (req, res) => {
-  const { accesstoken } = req.user;
-  const { userid } = req.body;
+  const { accesstoken, userid } = req.user;
+  const { id } = req.body;
   // 새로운 사용자 ID로 업데이트
   const updateUserIdSql = 'UPDATE users SET userid = ? WHERE accesstoken = ?';
-  connection.query(updateUserIdSql, [userid, accesstoken], (err, updateResult) => {
+  connection.query(updateUserIdSql, [id, accesstoken], (err, updateResult) => {
     if (err) {
       console.error(err);
       res.status(500).json({ error: 'Error updating user ID' });
       return;
     }
+    const updateRuleUserIdSql = 'UPDATE rules SET userid = ? WHERE userid = ?';
+    connection.query(updateRuleUserIdSql, [id, userid], (err, result) => {
+      if (err) {
+        console.error(err);
+      } else {
+      }
+    });
+    const updateCalendarUserIdSql = 'UPDATE calendar SET userid = ? WHERE userid = ?';
+    connection.query(updateCalendarUserIdSql, [id, userid], (err, result) => {
+      if (err) {
+        console.error(err);
+      } else {
+      }
+    });
+    const updateCalendarDateUserIdSql = 'UPDATE calendar_date SET userid = ? WHERE userid = ?';
+    connection.query(updateCalendarDateUserIdSql, [id, userid], (err, result) => {
+      if (err) {
+        console.error(err);
+      } else {
+      }
+    });
     res.status(200).json({ message: '사용자 ID가 성공적으로 변경되었습니다.' });
   });
 };
