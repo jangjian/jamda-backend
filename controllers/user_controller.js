@@ -384,38 +384,6 @@ exports.decreaseCount = (req, res)=> {
   })
 }
 
-// 운동량 누적 컨트롤러
-exports.today_increaseCount = (req, res)=> {
-  const {uuid} = req.body;
-  const sql = 'UPDATE rules SET today_count = today_count+1 WHERE uuid = ?;';
-  connection.query(sql, [uuid], (err, result)=>{
-    if (err) {
-      console.error(err);
-      res.status(500).json({ error: 'Error registering user' });
-      return;
-    }
-
-    console.log('증가');
-    res.status(200).json({ message: '증가' });
-  })
-}
-
-// 운동량 감소 컨트롤러
-exports.today_decreaseCount = (req, res)=> {
-  const {uuid} = req.body;
-  const sql = 'UPDATE rules SET today_count = today_count-1 WHERE uuid = ?;';
-  connection.query(sql, [uuid], (err, result)=>{
-    if (err) {
-      console.error(err);
-      res.status(500).json({ error: 'Error registering user' });
-      return;
-    }
-
-    console.log('증가');
-    res.status(200).json({ message: '증가' });
-  })
-}
-
 // 오늘의 목표 카운트 값 불러오기
 exports.getTodayCount = (req, res) => {
   const { uuid } = req.body;
@@ -439,6 +407,23 @@ exports.getTodayCount = (req, res) => {
     });
   });
 };
+
+// exports.today_count = (req, res) => {
+//   const { uuid, today_count } = req.body;
+
+//   // 현재 날짜를 가져옵니다.
+//   const currentDate = new Date();
+
+//   const sql = 'UPDATE rules SET today_count = ? WHERE uuid = ?';
+//   connection.query(sql, [today_count, uuid], (err, result) => {
+//     if (err) {
+//       console.error(err);
+//       res.status(500).json({ error: 'Error registering user' });
+//       return;
+//     }
+//     res.status(200).json({ message: 'User registered successfully' });
+//   });
+// };
 
 // 캘린더 컨트롤러
 exports.calendar = (req, res) => {
@@ -537,8 +522,7 @@ exports.getCompleteDate = (req, res) => {
       res.status(404).json({ error: 'Completedate not found for the user' });
       return;
     }
-
-    const completedate = result[0].completedate;
+    const completedate = result.map(row => row.completedate);
     const dayOfMonth = completedate.getDate(); // 날짜의 일 추출
 
     // 결과를 JSON 형식으로 응답합니다.

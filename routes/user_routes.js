@@ -63,12 +63,6 @@ router.post("/decreaseCount", userController.decreaseCount);
 // 규칙 불러오기(uuid) 라우트 
 router.post("/getTodayCount",userController.getTodayCount);
 
-// 오늘의 목표 카운트 증가 추가 라우트 
-router.post("/today_increaseCount", userController.today_increaseCount);
-
-// 오늘의 목표 카운트 감소 추가 라우트 
-router.post("/today_decreaseCount", userController.today_decreaseCount);
-
 // count 수가 1 이상인 규칙 불러오는 라우트
 router.get("/getUserRulesWithCount", getUser,userController.getUserRulesWithCount);
 
