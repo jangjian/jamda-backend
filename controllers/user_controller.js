@@ -40,10 +40,9 @@ exports.signup = (req, res) => {
   const seconds = currentDate.getSeconds().toString().padStart(2, '0');
 
   const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-  console.log(formattedDate);
 
   const sql = 'INSERT INTO users (userid, pw, email, registration_date) VALUES (?, ?, ?, ?)';
-  connection.query(sql, [userid, pw, email, currentDate], (err, result) => {
+  connection.query(sql, [userid, pw, email, formattedDate], (err, result) => {
     if (err) {
       console.error(err);
       res.status(500).json({ error: 'Error registering user' });
@@ -416,9 +415,9 @@ exports.calendar = (req, res) => {
   const seconds = currentDate.getSeconds().toString().padStart(2, '0');
 
   const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-  console.log(formattedDate);
+  
   const sql = 'INSERT INTO calendar_date (userid, completedate) VALUES (?, ?)';
-  connection.query(sql, [userid, currentDate], (err, result) => {
+  connection.query(sql, [userid, formattedDate], (err, result) => {
     if (err) {
       console.error(err);
       res.status(500).json({ error: 'Error registering user' });
