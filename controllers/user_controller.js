@@ -397,30 +397,6 @@ exports.getTodayCount = (req, res) => {
       return;
     }
     const today_count = result.map(row => row.today_count);
-
-    // 삽입할 SQL 쿼리
-    const sql = 'INSERT INTO message (userid, message, uuid) VALUES (?, ?, ?)';
-
-    // 응답을 기다리지 않고 바로 클라이언트로 응답을 보내기 위해 count 변수 추가
-    let count = 0;
-
-    // 메시지 배열의 각 요소에 대해 처리
-    for (const msg of message) {
-      const uuid = randomstring.generate(40); // 랜덤 UUID 생성
-
-      connection.query(sql, [userid, msg.message, uuid], (err, result) => {
-        if (err) {
-          console.error(err);
-        }
-
-        count++; // 쿼리가 실행될 때마다 count를 증가시킴
-
-        // 모든 쿼리가 실행되면 클라이언트로 응답 보냄
-        if (count === message.length) {
-          res.status(200).json({ message: 'Messages inserted successfully' });
-        }
-      });
-    }
     
     // 결과를 JSON 형식으로 응답합니다.
     res.status(200).json({
