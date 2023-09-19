@@ -364,10 +364,10 @@ exports.decreaseCount = (req, res)=> {
 
 // 오늘의 목표 카운트 값 불러오기
 exports.getTodayCount = (req, res) => {
-  const { uuid } = req.body;
-  // 사용자의 규칙 중 count가 1 이상인 규칙들을 가져옵니다.
-  const getUserRulesSql = 'SELECT today_count FROM rules WHERE uuid = ?';
-  connection.query(getUserRulesSql, [uuid], (err, result) => {
+  const { userid } = req.body;
+
+  const getUserRulesSql = 'SELECT today_count FROM rules WHERE userid = ?';
+  connection.query(getUserRulesSql, [userid], (err, result) => {
     if (err) {
       console.error(err);
       res.status(500).json({ error: '사용자 규칙 불러오기 중 오류가 발생했습니다.' });
