@@ -83,7 +83,7 @@ exports.setProfile = (req, res) => {
   // 이미지가 업로드되었을 경우
   if (req.file) {
     // 이미지 파일 업로드 및 경로 설정
-    imagePath = `/images/${req.file.filename}`;
+    imagePath = `/uploads/${req.file.filename}`;
   }
 
   // SQL 쿼리 수정: 이미지 파일 경로를 포함하여 업데이트
