@@ -4,21 +4,12 @@ const path = require('path');
 const randomstring = require('randomstring')
 const cron = require('node-cron');
 const nodemailer = require('nodemailer');
-const multer = require("multer");
 const connection = mysql.createConnection({
   host: '52.78.221.233',
   user: 'jamda',
   password: '1011',
   database: 'jamda_db'
 });
-
-var storage = multer.diskStorage({
-  destination : function (req, file, cb){
-    const ext = path.extname(file.originalname);
-    cb(null, path.basename(file.originalname, ext) + "-" + Date.now() + ext);
-  },
-});
-var upload = multer({storage :storage});
 
 
 // 회원가입 컨트롤러
@@ -86,26 +77,35 @@ exports.login = (req, res) => {
 exports.setProfile = (req, res) => {
   const { accesstoken } = req.user;
   const { name, bias, weight, goal_weight } = req.body;
-  const image = '/uploads/${req.file.filename}';
   
+  let imagePath = null; // 이미지 경로 초기화
+  
+  // 이미지가 업로드되었을 경우
+  if (req.file) {
+    // 이미지 파일 업로드 및 경로 설정
+    imagePath = `/uploads/${req.file.filename}`;
+  }
+
   // SQL 쿼리 수정: 이미지 파일 경로를 포함하여 업데이트
   const sql = 'UPDATE users SET name = ?, bias = ?, image = ?, weight = ?, goal_weight = ?, previousWeight = ?, hasProfile = 1 WHERE accesstoken = ?';
-  connection.query(sql, [name, bias, image, weight, goal_weight,weight, accesstoken], (err, result) => {
+  connection.query(sql, [name, bias, imagePath, weight, goal_weight, weight, accesstoken], (err, result) => {
     if (err) {
       console.error(err);
-      res.status(500).json({ error: 'Error during profile update' });
+      res.status(500).json({ error: '프로필 업데이트 중 오류가 발생했습니다.' });
       return;
     }
     if (result.affectedRows === 0) {
-      res.status(401).json({ error: 'Invalid credentials' });
+      res.status(401).json({ error: '잘못된 자격 증명' });
       return;
     }
     console.log('프로필 설정이 되었습니다.');
     // 프로필 설정이 완료되면 hasProfile 값을 업데이트합니다.
     // hasProfile은 1로 설정됩니다.
-    res.status(200).json({ message: 'Profile set successfully' });
+    res.status(200).json({ message: '프로필이 성공적으로 설정되었습니다.' });
   });
 };
+
+
 
 // 프로필 수정 컨트롤러
 exports.updateProfile = (req, res) => {
