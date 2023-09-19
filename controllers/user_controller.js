@@ -11,6 +11,22 @@ const connection = mysql.createConnection({
   database: 'jamda_db'
 });
 
+const cron = require('node-cron');
+
+// 20분 후인 11시에 작업을 실행
+cron.schedule('40 10 * * *', () => {
+  // 매일 자정에 count 값을 초기화하는 스케줄링
+  const resetSql = 'UPDATE rules SET count = 0, today_count = 0'; // 변경해야 할 SQL 쿼리 작성
+  connection.query(resetSql, (err, result) => {
+    if (err) {
+      console.error(err);
+      // 오류 처리 로직 추가
+      return;
+    }
+    console.log('열 초기화가 완료되었습니다.');
+  });
+});
+
 
 // 회원가입 컨트롤러
 exports.signup = (req, res) => {
@@ -256,17 +272,7 @@ exports.rules = (req, res) => {
           console.error(err);
           return res.status(500).json({ error: 'Error adding rule' });
       }
-      // 매일 자정에 count 값을 초기화하는 스케줄링
-      const resetCountCron = '0 0 * * *'; // 매일 자정에 실행
-      cron.schedule(resetCountCron, () => {
-          connection.query('UPDATE rules SET count = 0 WHERE uuid = ?', [uuid], (err, result) => {
-              if (err) {
-                  console.error(err);
-                  return;
-              }
-              console.log('Count reset successful');
-          });
-      });
+      
       return res.status(200).json({ message: '규칙 추가 완료' });
   });
 };
