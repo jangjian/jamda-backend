@@ -851,7 +851,7 @@ exports.message = (req, res) => {
 exports.getMessage = (req, res) => {
   const { userid } = req.body;
 
-  const getCompleteDateSql = 'SELECT message, uuid, first_message FROM message WHERE userid = ?';
+  const getCompleteDateSql = 'SELECT message, uuid FROM message WHERE userid = ?';
   connection.query(getCompleteDateSql, [userid], (err, result) => {
     if (err) {
       console.error(err);
