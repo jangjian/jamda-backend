@@ -127,11 +127,11 @@ exports.login = (req, res) => {
 exports.setProfile = (req, res) => {
   const { accesstoken } = req.user;
   const { name, bias, weight, goal_weight } = req.body; // 이미지 경로 받기
-  const image = `/images/${req.file.filename}`;
+  // const image = `/images/${req.file.filename}`;
 
   // SQL 쿼리 수정: 이미지 파일 경로를 포함하여 업데이트
   const sql = 'UPDATE users SET name = ?, bias = ?, image = null, weight = ?, goal_weight = ?, previousWeight = ?, hasProfile = 1 WHERE accesstoken = ?';
-  connection.query(sql, [name, bias, image, weight, goal_weight, weight, accesstoken], (err, result) => {
+  connection.query(sql, [name, bias, weight, goal_weight, weight, accesstoken], (err, result) => {
     if (err) {
       console.error(err);
       res.status(500).json({ error: '프로필 업데이트 중 오류가 발생했습니다.' });
