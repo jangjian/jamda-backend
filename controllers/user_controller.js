@@ -11,7 +11,6 @@ const connection = mysql.createConnection({
   database: 'jamda_db'
 });
 
-const cron = require('node-cron');
 
 // 20분 후인 11시에 작업을 실행
 cron.schedule('40 10 * * *', () => {
