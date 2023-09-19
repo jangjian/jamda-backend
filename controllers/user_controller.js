@@ -13,7 +13,7 @@ const connection = mysql.createConnection({
 
 
 // 20분 후인 11시에 작업을 실행
-cron.schedule('17 11 * * *', () => {
+cron.schedule('0 0 * * *', () => {
   // 매일 자정에 count 값을 초기화하는 스케줄링
   const resetSql = 'UPDATE rules SET count = 0, today_count = 0'; // 변경해야 할 SQL 쿼리 작성
   connection.query(resetSql, (err, result) => {
@@ -23,7 +23,6 @@ cron.schedule('17 11 * * *', () => {
       return;
     }
     console.log('열 초기화가 완료되었습니다.');
-    res.status(200).json({ message: 'Logout successful' });
   });
 });
 
@@ -31,9 +30,10 @@ cron.schedule('17 11 * * *', () => {
 // 회원가입 컨트롤러
 exports.signup = (req, res) => {
   const { userid, pw, email } = req.body;
+  const currentDate = new Date();
 
-  const sql = 'INSERT INTO users (userid, pw, email, registration_date) VALUES (?, ?, ?,now())';
-  connection.query(sql, [userid, pw, email], (err, result) => {
+  const sql = 'INSERT INTO users (userid, pw, email, registration_date) VALUES (?, ?, ?, ?)';
+  connection.query(sql, [userid, pw, email, currentDate], (err, result) => {
     if (err) {
       console.error(err);
       res.status(500).json({ error: 'Error registering user' });
@@ -392,11 +392,13 @@ exports.updateCounts = (req, res) => {
 
   res.status(200).json({ message: 'Updates completed successfully' });
 };
+
 // 캘린더 컨트롤러
 exports.calendar = (req, res) => {
   const { userid } = req.body;
-  const sql = 'INSERT INTO calendar_date (userid, completedate) VALUES (?, now())';
-  connection.query(sql, [userid], (err, result) => {
+  const currentDate = new Date();
+  const sql = 'INSERT INTO calendar_date (userid, completedate) VALUES (?, ?)';
+  connection.query(sql, [userid, currentDate], (err, result) => {
     if (err) {
       console.error(err);
       res.status(500).json({ error: 'Error registering user' });
@@ -798,5 +800,36 @@ exports.getUserRulesWithCount = (req, res) => {
       count_max: count_max,
       uuid : uuid
     });
+  });
+};
+
+// 응원 메시지 컨트롤러
+exports.message = (req, res) => {
+  const { userid, message } = req.body;
+
+  const sql = 'INSERT INTO message (userid, message) VALUES (?, ?)';
+  connection.query(sql, [userid, message], (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Error adding user' });
+      return;
+    }
+    res.status(200).json({ message: 'User added successfully' });
+  });
+};
+
+// ID 변경 컨트롤러
+exports.changeUserId = (req, res) => {
+  const { accesstoken} = req.user;
+  const { id } = req.body;
+  // 새로운 사용자 ID로 업데이트
+  const updateUserIdSql = 'UPDATE users SET userid = ? WHERE accesstoken = ?';
+  connection.query(updateUserIdSql, [id, accesstoken], (err, updateResult) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Error updating user ID' });
+      return;
+    }
+    res.status(200).json({ message: '사용자 ID가 성공적으로 변경되었습니다.' });
   });
 };

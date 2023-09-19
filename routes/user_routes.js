@@ -107,6 +107,9 @@ router.post("/certificate", userController.certificate);
 // 인증번호 확인 라우트
 router.post("/check-auth-code", userController.checkAuthCode);
 
+// 탈퇴 라우트 (DELETE)
+router.post('/message', userController.message);
+
 
 
 module.exports = router;
