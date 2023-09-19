@@ -19,13 +19,15 @@ const upload = multer({ storage: storage });
 
 // 이미지 업로드 라우트 추가
 router.post('/upload', upload.single('image'), (req, res) => {
-  // 이미지 업로드 처리 로직
-  console.log('Image uploaded:', req.file); // 업로드된 이미지 정보 확인
+    // 이미지 업로드 처리 로직
+    console.log('Image uploaded:', req.file); // 업로드된 이미지 정보 확인
+    
+    const imagePath = `/uploads/${req.file.filename}`; // 이미지 경로 생성
   
-  // 이후 이미지 경로를 DB에 저장하거나 필요한 작업을 수행할 수 있습니다.
+    // 클라이언트로 이미지 경로 응답
+    res.json({ imagePath });
+  });
   
-  res.send('Image uploaded successfully');
-});
 
 // 회원가입 라우트
 router.post('/signup', userController.signup);
