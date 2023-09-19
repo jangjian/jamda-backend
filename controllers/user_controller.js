@@ -889,3 +889,27 @@ exports.nowDecreaseCount = (req, res)=> {
     res.status(200).json({ message: '증가' });
   })
 }
+
+// 날짜 불러오는 컨트롤러
+exports.getNowCount = (req, res) => {
+  const { uuid } = req.body;
+  // 사용자의 completedate 가져오기
+  const getCompleteDateSql = 'SELECT complete_count FROM rules WHERE uuid = ?';
+  connection.query(getCompleteDateSql, [uuid], (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Error getting completedate' });
+      return;
+    }
+    if (result.length === 0) {
+      res.status(404).json({ error: 'complete_count not found for the rules' });
+      return;
+    }
+    const complete_count = result[0].complete_count;
+
+
+    // 결과를 JSON 형식으로 응답합니다.
+    res.status(200).json({ complete_count: complete_count });
+  
+  });
+};

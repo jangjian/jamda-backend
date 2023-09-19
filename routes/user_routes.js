@@ -94,6 +94,9 @@ router.post("/nowIncreaseCount", userController.nowIncreaseCount);
 // 운동량 카운트 감소 추가 라우트 
 router.post("/nowDecreaseCount", userController.nowDecreaseCount);
 
+// 운동량 카운트 불러오기 라우트 
+router.post("/getNowCount",userController.getNowCount);
+
 
 
 module.exports = router;
