@@ -1,6 +1,7 @@
 const mysql = require('mysql2');
 const fs = require('fs');
 const path = require('path');
+const multer = require("multer");
 const randomstring = require('randomstring')
 const cron = require('node-cron');
 const nodemailer = require('nodemailer');
@@ -12,10 +13,23 @@ const connection = mysql.createConnection({
 });
 
 
+var storage = multer.diskStorage({
+  destination : function(req, file, cb){
+    cb(null, "public/image/");
+  },
+  filename:function(req,file,cb){
+    const ext = path.extname(file.originalname);
+    cb(null, path.basename(file.originalname, ext) + "-" + Date().now() + ext);
+  },
+});
+
+var upload = multer({storage : storage});
+
+
 // 20분 후인 11시에 작업을 실행
 cron.schedule('0 0 * * *', () => {
   // 매일 자정에 count 값을 초기화하는 스케줄링
-  const resetSql = 'UPDATE rules SET count = 0, today_count = 0'; // 변경해야 할 SQL 쿼리 작성
+  const resetSql = 'UPDATE rules SET count = 0, today_count, complete_count = 0'; // 변경해야 할 SQL 쿼리 작성
   connection.query(resetSql, (err, result) => {
     if (err) {
       console.error(err);
@@ -98,10 +112,12 @@ exports.login = (req, res) => {
   });
 };
 
+// 프로필 설정 컨트롤러
 exports.setProfile = (req, res) => {
   const { accesstoken } = req.user;
-  const { name, bias, weight, goal_weight, image } = req.body; // 이미지 경로 받기
-  
+  const { name, bias, weight, goal_weight } = req.body; // 이미지 경로 받기
+  const image = `/images/${req.file.filename}`;
+
   // SQL 쿼리 수정: 이미지 파일 경로를 포함하여 업데이트
   const sql = 'UPDATE users SET name = ?, bias = ?, image = ?, weight = ?, goal_weight = ?, previousWeight = ?, hasProfile = 1 WHERE accesstoken = ?';
   connection.query(sql, [name, bias, image, weight, goal_weight, weight, accesstoken], (err, result) => {
@@ -120,8 +136,6 @@ exports.setProfile = (req, res) => {
     res.status(200).json({ message: '프로필이 성공적으로 설정되었습니다.' });
   });
 };
-
-
 
 // 프로필 수정 컨트롤러
 exports.updateProfile = (req, res) => {
@@ -342,7 +356,6 @@ exports.increaseCount = (req, res)=> {
       res.status(500).json({ error: 'Error registering user' });
       return;
     }
-    console.log('증가');
     res.status(200).json({ message: '증가' });
   })
 }
@@ -357,7 +370,6 @@ exports.decreaseCount = (req, res)=> {
       res.status(500).json({ error: 'Error registering user' });
       return;
     }
-    console.log('증가');
     res.status(200).json({ message: '증가' });
   })
 }
@@ -383,6 +395,7 @@ exports.getTodayCount = (req, res) => {
   });
 };
 
+// 오늘의 목표 카운트 값 저장 컨트롤러 
 exports.updateCounts = (req, res) => {
   const updates = req.body.updates; 
 
@@ -406,7 +419,6 @@ exports.updateCounts = (req, res) => {
 
   res.status(200).json({ message: 'Updates completed successfully' });
 };
-
 
 // 캘린더 컨트롤러
 exports.calendar = (req, res) => {
@@ -811,7 +823,7 @@ exports.message = (req, res) => {
   });
 };
 
-// ID 변경 컨트롤러
+// 메시지 수정 컨트롤러
 exports.changeMessage = (req, res) => {
   const { accesstoken} = req.user;
   const { id } = req.body;
@@ -827,7 +839,7 @@ exports.changeMessage = (req, res) => {
   });
 };
 
-// 규칙 삭제 컨트롤러
+// 메시지 삭제 컨트롤러
 exports.deleteMessage = (req, res) => {
   const { uuid, message } = req.body;
 
@@ -849,3 +861,31 @@ exports.deleteMessage = (req, res) => {
     }
   );
 };
+
+// 현재 운동량 누적 컨트롤러
+exports.nowIncreaseCount = (req, res)=> {
+  const {uuid} = req.body;
+  const sql = 'UPDATE rules SET complete_count = complete_count+1 WHERE uuid = ?;';
+  connection.query(sql, [uuid], (err, result)=>{
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Error registering user' });
+      return;
+    }
+    res.status(200).json({ message: '증가' });
+  })
+}
+
+// 현재 운동량 감소 컨트롤러
+exports.nowDecreaseCount = (req, res)=> {
+  const {uuid} = req.body;
+  const sql = 'UPDATE rules SET complete_count = complete_count-1 WHERE uuid = ?;';
+  connection.query(sql, [uuid], (err, result)=>{
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Error registering user' });
+      return;
+    }
+    res.status(200).json({ message: '증가' });
+  })
+}

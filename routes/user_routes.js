@@ -2,31 +2,6 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/user_controller'); // 사용자 컨트롤러 가져오기
 const { getUser } = require('../modules/getUser');
-const multer = require('multer'); // multer 미들웨어 추가
-
-// 이미지 업로드를 위한 multer 설정
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // 이미지 파일을 저장할 디렉토리 설정
-  },
-  filename: (req, file, cb) => {
-    // 파일 이름 설정 (고유한 이름으로 저장하도록 설정 가능)
-    cb(null, `${Date.now()}_${file.originalname}`);
-  },
-});
-
-const upload = multer({ storage: storage });
-
-// 이미지 업로드 라우트 추가
-router.post('/upload', upload.single('image'), (req, res) => {
-    // 이미지 업로드 처리 로직
-    console.log('Image uploaded:', req.file); // 업로드된 이미지 정보 확인
-    
-    const imagePath = `/uploads/${req.file.filename}`; // 이미지 경로 생성
-  
-    // 클라이언트로 이미지 경로 응답
-    res.json({ imagePath });
-  });
   
 
 // 회원가입 라우트
@@ -112,6 +87,12 @@ router.post('/changeMessage', userController.changeMessage);
 
 // 메시지 삭제 라우트
 router.post('/deleteMessage', userController.deleteMessage);
+
+// 운동량 카운트 증가 추가 라우트 
+router.post("/nowIncreaseCount", userController.nowIncreaseCount);
+
+// 운동량 카운트 감소 추가 라우트 
+router.post("/nowDecreaseCount", userController.nowDecreaseCount);
 
 
 
