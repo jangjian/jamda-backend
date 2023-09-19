@@ -300,7 +300,7 @@ exports.getAllRulesByUuid = (req, res) => {
 exports.rules = (req, res) => {
   const { userid, activity, exercise, activity_num, unit, count_min, count_max } = req.body;
   const uuid = randomstring.generate(40);
-  const sql = 'INSERT INTO rules (uuid, userid, activity, exercise, activity_num, unit, count_min, count_max, count, today_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+  const sql = 'INSERT INTO rules (uuid, userid, activity, exercise, activity_num, unit, count_min, count_max, count, today_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
   
   connection.query(sql, [uuid, userid, activity, exercise, activity_num, unit, count_min, count_max, 0, count_min], (err, result) => {
       if (err) {
