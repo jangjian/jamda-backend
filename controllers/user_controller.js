@@ -29,7 +29,7 @@ var upload = multer({storage : storage});
 // 20분 후인 11시에 작업을 실행
 cron.schedule('0 0 * * *', () => {
   // 매일 자정에 count 값을 초기화하는 스케줄링
-  const resetSql = 'UPDATE rules SET count = 0, today_count = 0, complete_count = count_min'; // 변경해야 할 SQL 쿼리 작성
+  const resetSql = 'UPDATE rules SET count = 0, today_count = count_min, complete_count = 0'; // 변경해야 할 SQL 쿼리 작성
   connection.query(resetSql, (err, result) => {
     if (err) {
       console.error(err);
@@ -300,7 +300,7 @@ exports.getAllRulesByUuid = (req, res) => {
 exports.rules = (req, res) => {
   const { userid, activity, exercise, activity_num, unit, count_min, count_max } = req.body;
   const uuid = randomstring.generate(40);
-  const sql = 'INSERT INTO rules (uuid, userid, activity, exercise, activity_num, unit, count_min, count_max, count, complete_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+  const sql = 'INSERT INTO rules (uuid, userid, activity, exercise, activity_num, unit, count_min, count_max, count, today_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
   
   connection.query(sql, [uuid, userid, activity, exercise, activity_num, unit, count_min, count_max, 0, count_min], (err, result) => {
       if (err) {
