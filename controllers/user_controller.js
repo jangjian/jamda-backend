@@ -23,6 +23,7 @@ cron.schedule('15 11 * * *', () => {
       return;
     }
     console.log('열 초기화가 완료되었습니다.');
+    res.status(200).json({ message: 'Logout successful' });
   });
 });
 
