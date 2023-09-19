@@ -840,7 +840,7 @@ exports.message = (req, res) => {
 exports.getMessage = (req, res) => {
   const { userid } = req.body;
 
-  const getCompleteDateSql = 'SELECT message, uuid FROM message WHERE userid = ?';
+  const getCompleteDateSql = 'SELECT message, uuid, first_message FROM message WHERE userid = ?';
   connection.query(getCompleteDateSql, [userid], (err, result) => {
     if (err) {
       console.error(err);
@@ -853,8 +853,9 @@ exports.getMessage = (req, res) => {
     }
     const message = result.map(row => row.message);
     const uuid = result.map(row => row.uuid);
+    const first_message = result.map(row => row.first_message);
 
-    res.status(200).json({ message : message, uuid : uuid });
+    res.status(200).json({ message : message, uuid : uuid, first_message : first_message });
   });
 };
 
