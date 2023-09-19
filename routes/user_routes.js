@@ -107,8 +107,14 @@ router.post("/certificate", userController.certificate);
 // 인증번호 확인 라우트
 router.post("/check-auth-code", userController.checkAuthCode);
 
-// 탈퇴 라우트 (DELETE)
+// 메시지 추가 라우트 
 router.post('/message', userController.message);
+
+// 메시지 편집 라우트
+router.post('/changeMessage', userController.changeMessage);
+
+// 메시지 삭제 라우트
+router.post('/deleteMessage', userController.deleteMessage);
 
 
 

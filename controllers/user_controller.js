@@ -825,9 +825,10 @@ exports.getUserRulesWithCount = (req, res) => {
 // 응원 메시지 컨트롤러
 exports.message = (req, res) => {
   const { userid, message } = req.body;
+  const uuid = randomstring.generate(40);
 
-  const sql = 'INSERT INTO message (userid, message) VALUES (?, ?)';
-  connection.query(sql, [userid, message], (err, result) => {
+  const sql = 'INSERT INTO message (userid, message, uuid) VALUES (?, ?, ?)';
+  connection.query(sql, [userid, message, uuid], (err, result) => {
     if (err) {
       console.error(err);
       res.status(500).json({ error: 'Error adding user' });
@@ -838,7 +839,7 @@ exports.message = (req, res) => {
 };
 
 // ID 변경 컨트롤러
-exports.changeUserId = (req, res) => {
+exports.changeMessage = (req, res) => {
   const { accesstoken} = req.user;
   const { id } = req.body;
   // 새로운 사용자 ID로 업데이트
@@ -851,4 +852,27 @@ exports.changeUserId = (req, res) => {
     }
     res.status(200).json({ message: '사용자 ID가 성공적으로 변경되었습니다.' });
   });
+};
+
+// 규칙 삭제 컨트롤러
+exports.deleteMessage = (req, res) => {
+  const { uuid, message } = req.body;
+
+  const updateProfileSql = 'UPDATE message SET message = ? WHERE uuid = ?';
+  connection.query(
+    updateProfileSql,
+    [message, uuid],
+    (err, result) => {
+      if (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error during message update' });
+        return;
+      }
+      if (result.affectedRows === 0) {
+        res.status(401).json({ error: 'Invalid credentials' });
+        return;
+      }
+      res.status(200).json({ message: '메시지가 변경되었습니다.' });
+    }
+  );
 };
