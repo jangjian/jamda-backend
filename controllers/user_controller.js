@@ -383,7 +383,6 @@ exports.getTodayCount = (req, res) => {
   });
 };
 
-// 오늘의 목표 컨트롤러 
 exports.updateCounts = (req, res) => {
   const updates = req.body.updates; 
 
@@ -391,16 +390,23 @@ exports.updateCounts = (req, res) => {
 
   for (const update of updates) {
     const { today_count, uuid } = update;
-    
-    connection.query(sql, [today_count, uuid], (err, result) => {
-      if (err) {
-        console.error(err);
+
+    // today_count가 배열일 경우 각각의 값을 처리
+    if (Array.isArray(today_count)) {
+      for (let i = 0; i < today_count.length; i++) {
+        const goalDate = today_count[i];
+        connection.query(sql, [goalDate, uuid[i]], (err, result) => {
+          if (err) {
+            console.error(err);
+          }
+        });
       }
-    });
+    }
   }
 
   res.status(200).json({ message: 'Updates completed successfully' });
 };
+
 
 // 캘린더 컨트롤러
 exports.calendar = (req, res) => {
@@ -786,39 +792,6 @@ exports.checkAuthCode = (req, res) => {
     }
     // 인증 성공
     return res.status(200).json({ message: '인증번호가 확인되었습니다.' });
-  });
-};
-
-// 사용자의 규칙 중 count가 1 이상인 규칙 불러오기 컨트롤러
-exports.getUserRulesWithCount = (req, res) => {
-  const { userid } = req.user;
-  // 사용자의 규칙 중 count가 1 이상인 규칙들을 가져옵니다.
-  const getUserRulesSql = 'SELECT activity, exercise, activity_num, unit, count_min, count_max, count, uuid FROM rules WHERE userid = ? AND count >= 1';
-  connection.query(getUserRulesSql, [userid], (err, result) => {
-    if (err) {
-      console.error(err);
-      res.status(500).json({ error: '사용자 규칙 불러오기 중 오류가 발생했습니다.' });
-      return;
-    }
-    const activity = result.map(row => row.activity);
-    const exercise = result.map(row => row.exercise);
-    const activity_num = result.map(row => row.activity_num);
-    const unit = result.map(row => row.unit);
-    const count = result.map(row => row.count);
-    const count_min = result.map(row => row.count_min);
-    const count_max = result.map(row => row.count_max);
-    const uuid = result.map(row => row.uuid);
-    // 결과를 JSON 형식으로 응답합니다.
-    res.status(200).json({
-      activity: activity,
-      exercise: exercise,
-      activityNum: activity_num,
-      unit: unit,
-      count: count,
-      count_min: count_min,
-      count_max: count_max,
-      uuid : uuid
-    });
   });
 };
 
