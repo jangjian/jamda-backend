@@ -415,7 +415,7 @@ exports.calendar = (req, res) => {
   const seconds = currentDate.getSeconds().toString().padStart(2, '0');
 
   const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-  
+
   const sql = 'INSERT INTO calendar_date (userid, completedate) VALUES (?, ?)';
   connection.query(sql, [userid, formattedDate], (err, result) => {
     if (err) {
