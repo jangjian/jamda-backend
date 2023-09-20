@@ -14,12 +14,10 @@ const connection = mysql.createConnection({
 
 cron.schedule('0 0 * * *', () => {
 
-  // 매일 자정에 count 값을 초기화하는 스케줄링
   const resetSql = 'UPDATE rules SET count = 0, today_count = count_min, complete_count = 0'; // 변경해야 할 SQL 쿼리 작성
   connection.query(resetSql, (err, result) => {
     if (err) {
       console.error(err);
-      // 오류 처리 로직 추가
       return;
     }
   });
@@ -32,7 +30,7 @@ exports.signup = (req, res) => {
   const currentDate = new Date();
 
   const year = currentDate.getFullYear();
-  const month = (currentDate.getMonth() + 1).toString().padStart(2, '0'); // 월은 0부터 시작하므로 +1 필요
+  const month = (currentDate.getMonth() + 1).toString().padStart(2, '0'); 
   const day = currentDate.getDate().toString().padStart(2, '0');
   const hours = currentDate.getHours().toString().padStart(2, '0');
   const minutes = currentDate.getMinutes().toString().padStart(2, '0');
@@ -47,11 +45,10 @@ exports.signup = (req, res) => {
       res.status(500).json({ error: 'Error registering user' });
       return;
     }
-    // 삽입할 SQL 쿼리
     const sql = 'INSERT INTO message (userid, message, uuid) VALUES (?, ?, ?)';
 
 
-    const uuid = randomstring.generate(40); // 랜덤 UUID 생성
+    const uuid = randomstring.generate(40); 
 
     connection.query(sql, [userid, "최애의 메시지를 입력해보세요!", uuid], (err, result) => {
       if (err) {
@@ -80,7 +77,7 @@ exports.checkDuplicate = (req, res) => {
 // 로그인 컨트롤러
 exports.login = (req, res) => {
   const { userid, pw } = req.body;
-  const token = randomstring.generate(40); // 새로운 토큰 생성
+  const token = randomstring.generate(40);
   const sql = 'SELECT * FROM users WHERE userid = ? AND pw = ?';
   connection.query(sql, [userid, pw], (err, result) => {
     if (err) {
@@ -95,7 +92,7 @@ exports.login = (req, res) => {
     const userData = {
       userid: result[0].userid,
       token: token,
-      hasProfile: result[0].hasProfile, // hasProfile 값을 반환
+      hasProfile: result[0].hasProfile, 
     };
     // 사용자 정보에 토큰 업데이트
     connection.query('UPDATE users SET accesstoken = ? WHERE userid = ?', [token, userid], (updateErr, updateResult) => {
@@ -112,10 +109,9 @@ exports.login = (req, res) => {
 // 프로필 설정 컨트롤러
 exports.setProfile = (req, res) => {
   const { accesstoken } = req.user;
-  const { name, bias, weight, goal_weight } = req.body; // 이미지 경로 받기
+  const { name, bias, weight, goal_weight } = req.body; 
   // const image = `/images/${req.file.filename}`;
 
-  // SQL 쿼리 수정: 이미지 파일 경로를 포함하여 업데이트
   const sql = 'UPDATE users SET name = ?, bias = ?, image = null, weight = ?, goal_weight = ?, previousWeight = ?, hasProfile = 1 WHERE accesstoken = ?';
   connection.query(sql, [name, bias, weight, goal_weight, weight, accesstoken], (err, result) => {
     if (err) {
@@ -128,8 +124,6 @@ exports.setProfile = (req, res) => {
       return;
     }
     console.log('프로필 설정이 되었습니다.');
-    // 프로필 설정이 완료되면 hasProfile 값을 업데이트합니다.
-    // hasProfile은 1로 설정됩니다.
     res.status(200).json({ message: '프로필이 성공적으로 설정되었습니다.' });
   });
 };
@@ -139,7 +133,6 @@ exports.updateProfile = (req, res) => {
   const { accesstoken } = req.user;
   const { name, bias, weight, goal_weight } = req.body;
   const image = req.files && req.files.image;
-  // 이미지 파일 업로드 및 경로 얻기 (사용하는 라이브러리에 따라 다를 수 있음)
   let imagePath = null;
   if (image) {
     const imageName = `profile_${accesstoken}_${Date.now()}.jpg`;
@@ -152,7 +145,6 @@ exports.updateProfile = (req, res) => {
       }
     });
   }
-  // SQL 쿼리 수정: 이미지 파일 경로를 포함하여 업데이트
   const updateProfileSql = 'UPDATE users SET name = ?, bias = ?, image = ?, weight = ?, goal_weight = ? WHERE accesstoken = ?';
   connection.query(
     updateProfileSql,
@@ -176,7 +168,6 @@ exports.updateProfile = (req, res) => {
 // 사용자의 정보를 가져오는 컨트롤러
 exports.getUserInfo = (req, res) => {
   const { accesstoken } = req.user;
-  // 사용자 정보를 가져옵니다.
   const getUserInfoSql = 'SELECT name, bias, weight, goal_weight, previousWeight, registration_date FROM users WHERE accesstoken = ?';
   connection.query(getUserInfoSql, [accesstoken], (err, result) => {
     if (err) {
@@ -188,7 +179,6 @@ exports.getUserInfo = (req, res) => {
       res.status(401).json({ error: 'User not found' });
       return;
     }
-    // 사용자 정보 및 일 단위로 표시된 날짜 차이를 클라이언트에 반환합니다.
     const userName = result[0].name;
     const userBias = result[0].bias;
     const userWeight = result[0].weight;
@@ -210,7 +200,7 @@ exports.getUserInfo = (req, res) => {
 // 규칙을 불러오는 컨트롤러
 exports.getRules = (req, res) => {
   const { userid } = req.user;
-  // 사용자의 모든 규칙 정보를 가져옵니다.
+
   const getRuleInfoSql = 'SELECT activity, exercise, activity_num, count_min, count_max, unit, count, uuid FROM rules WHERE userid = ?';
   connection.query(getRuleInfoSql, [userid], (err, result) => {
     if (err) {
@@ -230,7 +220,7 @@ exports.getRules = (req, res) => {
     const count_max = result.map(row => row.count_max);
     const baseExerCount = result.map(row => row.count);
     const uuid = result.map(row => row.uuid);
-    // 결과를 JSON 형식으로 응답합니다.
+
     res.status(200).json({
       activity: likeDo,
       exercise: exerciseTitle,
@@ -246,8 +236,8 @@ exports.getRules = (req, res) => {
 
 // "uuid" 값을 사용하여 모든 규칙을 불러오는 컨트롤러
 exports.getAllRulesByUuid = (req, res) => {
-  const { uuid } = req.body; // 요청에서 "uuid" 값을 받아옵니다.
-  // 해당 "uuid"에 연관된 모든 규칙 정보를 데이터베이스에서 가져옵니다.
+  const { uuid } = req.body; 
+
   const getRulesByUuidSql = 'SELECT activity, exercise, activity_num, unit, count_min, count_max,count, uuid FROM rules WHERE uuid = ?';
   connection.query(getRulesByUuidSql, [uuid], (err, result) => {
     if (err) {
@@ -267,7 +257,7 @@ exports.getAllRulesByUuid = (req, res) => {
     const count_max = result.map(row => row.count_max);
     const count = result.map(row => row.count);
     const uuid = result.map(row => row.uuid);
-    // 결과를 JSON 형식으로 응답합니다.
+
     res.status(200).json({
       activity: activity,
       exercise: exercise,
@@ -301,7 +291,7 @@ exports.rules = (req, res) => {
 // 규칙 삭제 컨트롤러
 exports.deleteRule = (req, res) => {
   const { uuid } = req.body;
-  // 사용자 ID와 규칙 UUID를 기반으로 규칙을 삭제합니다.
+
   const deleteRuleSql = 'DELETE FROM rules WHERE uuid = ?';
   connection.query(deleteRuleSql, [uuid], (err, result) => {
     if (err) {
@@ -309,12 +299,12 @@ exports.deleteRule = (req, res) => {
       res.status(500).json({ error: 'Error deleting rule' });
       return;
     }
-    // 삭제된 행이 없으면 해당 UUID에 대한 규칙이 없는 것입니다.
+    
     if (result.affectedRows === 0) {
       res.status(404).json({ error: '해당 UUID에 대한 규칙을 찾을 수 없습니다.' });
       return;
     }
-    // 삭제 성공
+    
     res.status(200).json({ message: '규칙이 성공적으로 삭제되었습니다.' });
   });
 };
@@ -323,7 +313,7 @@ exports.deleteRule = (req, res) => {
 exports.updateRules = (req, res) => {
   const { uuid } = req.body;
   const { activity, exercise, activity_num, unit, count_min, count_max } = req.body;
-  // SQL 쿼리 수정: 이미지 파일 경로를 포함하여 업데이트
+
   const updateProfileSql = 'UPDATE rules SET activity = ?, exercise = ?, activity_num = ?, unit = ?, count_min = ?, count_max = ? WHERE uuid = ?';
   connection.query(
     updateProfileSql,
@@ -402,7 +392,6 @@ exports.updateCounts = (req, res) => {
   for (const update of updates) {
     const { today_count, uuid } = update;
 
-    // today_count가 배열일 경우 각각의 값을 처리
     if (Array.isArray(today_count)) {
       for (let i = 0; i < today_count.length; i++) {
         const goalDate = today_count[i];
@@ -446,7 +435,7 @@ exports.calendar = (req, res) => {
 // 색깔 추가 컨트롤러
 exports.calendarColor = (req, res)=> {
   const { userid, color } = req.body;
-  // 이미 해당 사용자의 컬러 값이 있는지 확인
+
   const checkColorSql = 'SELECT COUNT(*) AS count FROM calendar WHERE userid = ?';
   connection.query(checkColorSql, [userid], (checkErr, checkResult) => {
     if (checkErr) {
@@ -454,7 +443,7 @@ exports.calendarColor = (req, res)=> {
       return res.status(500).json({ error: '컬러 확인 중 오류가 발생했습니다.' });
     }
     if (checkResult[0].count === 0) {
-      // 해당 사용자에 대한 컬러 값이 아직 없으므로 새로 추가
+
       const insertColorSql = 'INSERT INTO calendar (userid, color) VALUES (?, ?)';
       connection.query(insertColorSql, [userid, color], (insertErr, insertResult) => {
         if (insertErr) {
@@ -501,7 +490,7 @@ exports.getCalendarColor = (req, res)=> {
 // 날짜 불러오는 컨트롤러
 exports.getCompleteDate = (req, res) => {
   const { userid } = req.user;
-  // 사용자의 completedate 가져오기
+
   const getCompleteDateSql = 'SELECT completedate FROM calendar_date WHERE userid = ?';
   connection.query(getCompleteDateSql, [userid], (err, result) => {
     if (err) {
@@ -525,8 +514,7 @@ exports.getCompleteDate = (req, res) => {
 // 로그아웃 컨트롤러
 exports.logout = (req, res) => {
   const { userid } = req.body;
-  // 토큰을 데이터베이스에서 삭제 또는 무효화하는 작업 수행
-  // 여기서는 예시로 데이터베이스에서 해당 사용자의 토큰을 삭제하는 로직을 사용
+  
   connection.query('UPDATE users SET accesstoken = NULL WHERE userid = ?', [userid], (err, result) => {
     if (err) {
       console.error(err);
@@ -577,6 +565,15 @@ exports.leave = (req, res) => {
         console.log('User calendar data deleted successfully');
       }
     });
+    // 사용자 메시지 데이터 삭제
+    const message_dateSql = 'DELETE FROM message WHERE userid = ?';
+    connection.query(message_dateSql, [userid], (err, result) => {
+      if (err) {
+        console.error(err);
+      } else {
+        console.log('User calendar data deleted successfully');
+      }
+    });
     // 프로필 정보 삭제 및 이미지 삭제
     const deleteProfileAndImageSql = 'DELETE FROM users WHERE accesstoken = ?';
     connection.query(deleteProfileAndImageSql, [accesstoken], (err, result) => {
@@ -606,7 +603,7 @@ exports.leave = (req, res) => {
 exports.changeUserId = (req, res) => {
   const { accesstoken, userid } = req.user;
   const { id } = req.body;
-  // 새로운 사용자 ID로 업데이트
+
   const updateUserIdSql = 'UPDATE users SET userid = ? WHERE accesstoken = ?';
   connection.query(updateUserIdSql, [id, accesstoken], (err, updateResult) => {
     if (err) {
@@ -643,7 +640,7 @@ exports.changeUserId = (req, res) => {
 exports.changePassword = (req, res) => {
   const { accesstoken } = req.user;
   const {currentPassword, newPassword} = req.body;
-  // 현재 비밀번호가 일치하는지 확인
+  
   const checkCurrentPasswordSql = 'SELECT * FROM users WHERE accesstoken = ? AND pw = ?';
   connection.query(checkCurrentPasswordSql, [accesstoken, currentPassword], (err, result) => {
     if (err) {
@@ -655,7 +652,7 @@ exports.changePassword = (req, res) => {
       res.status(401).json({ error: '현재 비밀번호가 일치하지 않습니다.' });
       return;
     }
-    // 비밀번호를 새로운 비밀번호로 업데이트
+
     const updatePasswordSql = 'UPDATE users SET pw = ? WHERE accesstoken = ?';
     connection.query(updatePasswordSql, [newPassword, accesstoken], (updateErr, updateResult) => {
       if (updateErr) {
@@ -669,22 +666,28 @@ exports.changePassword = (req, res) => {
   });
 };
 
-// 비밀번호 변경 컨트롤러
+// 비밀번호 찾기  변경 컨트롤러
 exports.loginChangePassword = (req, res) => {
-  const { userid, newPassword } = req.body;
+  const { userid } = req.body; 
+  const { newPassword, confirmPassword } = req.body; 
 
-    // 비밀번호를 새로운 비밀번호로 업데이트
-    const updatePasswordSql = 'UPDATE users SET pw = ? WHERE userid = ?';
-    connection.query(updatePasswordSql, [newPassword, userid], (updateErr, updateResult) => {
-      if (updateErr) {
-        console.error(updateErr);
-        res.status(500).json({ error: '비밀번호 변경 중 오류가 발생했습니다.' });
-        return;
-      }
-      console.log('비밀번호가 성공적으로 변경되었습니다.');
-      res.status(200).json({ message: '비밀번호가 성공적으로 변경되었습니다.' });
+  // 비밀번호 확인
+  if (newPassword !== confirmPassword) {
+    return res.status(400).json({ error: '비밀번호와 비밀번호 확인이 일치하지 않습니다.' });
+  }
+
+  // 비밀번호를 새로운 비밀번호로 업데이트
+  const updatePasswordSql = 'UPDATE users SET pw = ? WHERE userid = ?';
+  connection.query(updatePasswordSql, [newPassword, userid], (updateErr, updateResult) => {
+    if (updateErr) {
+      console.error(updateErr);
+      return res.status(500).json({ error: '비밀번호 변경 중 오류가 발생했습니다.' });
+    }
+    console.log('비밀번호가 성공적으로 변경되었습니다.');
+    res.status(200).json({ message: '비밀번호가 성공적으로 변경되었습니다.' });
   });
 };
+
 
 // 아이디 찾기 컨트롤러
 exports.findUserId = (req, res) => {
