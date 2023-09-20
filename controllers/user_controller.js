@@ -26,19 +26,19 @@ var storage = multer.diskStorage({
 var upload = multer({storage : storage});
 
 
-cron.schedule('*/10 * * * * *', () => {
-  console.log('열 초기화가 완료되었습니다.');
+// cron.schedule('*/10 * * * * *', () => {
+//   console.log('열 초기화가 완료되었습니다.');
 
-  // 매일 자정에 count 값을 초기화하는 스케줄링
-  const resetSql = 'UPDATE rules SET count = 0, today_count = count_min, complete_count = 0'; // 변경해야 할 SQL 쿼리 작성
-  connection.query(resetSql, (err, result) => {
-    if (err) {
-      console.error(err);
-      // 오류 처리 로직 추가
-      return;
-    }
-  });
-});
+//   // 매일 자정에 count 값을 초기화하는 스케줄링
+//   const resetSql = 'UPDATE rules SET count = 0, today_count = count_min, complete_count = 0'; // 변경해야 할 SQL 쿼리 작성
+//   connection.query(resetSql, (err, result) => {
+//     if (err) {
+//       console.error(err);
+//       // 오류 처리 로직 추가
+//       return;
+//     }
+//   });
+// });
 
 
 // 회원가입 컨트롤러
