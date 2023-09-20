@@ -27,7 +27,7 @@ var upload = multer({storage : storage});
 
 
 // 20분 후인 11시에 작업을 실행
-cron.schedule('0 0 * * *', () => {
+cron.schedule('10 15 * * *', () => {
   // 매일 자정에 count 값을 초기화하는 스케줄링
   const resetSql = 'UPDATE rules SET count = 0, today_count = count_min, complete_count = 0'; // 변경해야 할 SQL 쿼리 작성
   connection.query(resetSql, (err, result) => {
