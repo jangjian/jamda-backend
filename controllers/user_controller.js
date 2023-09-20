@@ -26,8 +26,9 @@ var storage = multer.diskStorage({
 var upload = multer({storage : storage});
 
 
-// 20분 후인 11시에 작업을 실행
-cron.schedule('10 15 * * *', () => {
+cron.schedule('*/10 * * * * *', () => {
+  console.log('열 초기화가 완료되었습니다.');
+
   // 매일 자정에 count 값을 초기화하는 스케줄링
   const resetSql = 'UPDATE rules SET count = 0, today_count = count_min, complete_count = 0'; // 변경해야 할 SQL 쿼리 작성
   connection.query(resetSql, (err, result) => {
@@ -36,7 +37,6 @@ cron.schedule('10 15 * * *', () => {
       // 오류 처리 로직 추가
       return;
     }
-    console.log('열 초기화가 완료되었습니다.');
   });
 });
 
