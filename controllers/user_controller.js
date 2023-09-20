@@ -911,25 +911,11 @@ exports.deleteMessage = (req, res) => {
   );
 };
 
-// 현재 운동량 누적 컨트롤러
-exports.nowIncreaseCount = (req, res)=> {
-  const {uuid} = req.body;
-  const sql = 'UPDATE rules SET complete_count = complete_count+1 WHERE uuid = ?;';
-  connection.query(sql, [uuid], (err, result)=>{
-    if (err) {
-      console.error(err);
-      res.status(500).json({ error: 'Error registering user' });
-      return;
-    }
-    res.status(200).json({ message: '증가' });
-  })
-}
-
-// 현재 운동량 감소 컨트롤러
-exports.nowDecreaseCount = (req, res)=> {
-  const {uuid} = req.body;
-  const sql = 'UPDATE rules SET complete_count = complete_count-1 WHERE uuid = ?;';
-  connection.query(sql, [uuid], (err, result)=>{
+// 현재 운동량 받아오기 컨트롤러
+exports.postCompleteCount = (req, res)=> {
+  const {uuid, complete_count} = req.body;
+  const sql = 'UPDATE rules SET complete_count = ? WHERE uuid = ?;';
+  connection.query(sql, [complete_count, uuid], (err, result)=>{
     if (err) {
       console.error(err);
       res.status(500).json({ error: 'Error registering user' });

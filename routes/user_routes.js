@@ -88,14 +88,11 @@ router.post('/changeMessage', userController.changeMessage);
 // 메시지 삭제 라우트
 router.post('/deleteMessage', userController.deleteMessage);
 
-// 운동량 카운트 증가 추가 라우트 
-router.post("/nowIncreaseCount", userController.nowIncreaseCount);
-
-// 운동량 카운트 감소 추가 라우트 
-router.post("/nowDecreaseCount", userController.nowDecreaseCount);
-
 // 운동량 카운트 불러오기 라우트 
 router.post("/getNowCount",userController.getNowCount);
+
+// 운동량 카운트 받아오기 라우트 
+router.post("/postCompleteCount",userController.postCompleteCount);
 
 // 메시지 불러오기 라우트 
 router.post("/getMessage",userController.getMessage);
