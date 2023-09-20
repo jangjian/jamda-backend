@@ -820,32 +820,6 @@ exports.checkAuthCode = (req, res) => {
   });
 };
 
-// // 응원 메시지 컨트롤러
-// exports.message = (req, res) => {
-//   const { userid, message } = req.body; // 프론트에서 userid와 message 배열을 받아옵니다.
-
-//   // 삽입할 SQL 쿼리
-//   const sql = 'INSERT INTO message (userid, message, uuid) VALUES (?, ?, ?)';
-//   let count = 0;
-//   for (const msg of message) {
-//     const uuid = randomstring.generate(40); // 랜덤 UUID 생성
-
-//     connection.query(sql, [userid, msg.message, uuid], (err, result) => {
-//       if (err) {
-//         console.error(err);
-//       }
-
-//       count++; // 쿼리가 실행될 때마다 count를 증가시킴
-
-//       // 모든 쿼리가 실행되면 클라이언트로 응답 보냄
-//       if (count === message.length) {
-//         res.status(200).json({ message: 'Messages inserted successfully' });
-//       }
-//     });
-//   }
-// };
-
-
 // 응원 메시지 저장 컨트롤러 
 exports.message = (req, res) => {
   const updates = req.body.updates; 
@@ -896,17 +870,25 @@ exports.getMessage = (req, res) => {
 
 // 메시지 수정 컨트롤러
 exports.changeMessage = (req, res) => {
-  const { message, uuid} = req.body;
-  // 새로운 사용자 ID로 업데이트
-  const updateUserIdSql = 'UPDATE message SET message = ? WHERE uuid = ?';
-  connection.query(updateUserIdSql, [id, accesstoken], (err, updateResult) => {
-    if (err) {
-      console.error(err);
-      res.status(500).json({ error: 'Error updating user ID' });
-      return;
+  const updates = req.body.updates; 
+
+  const sql = 'UPDATE message SET message = ? WHERE uuid = ?';
+
+  for (const update of updates) {
+    const { message, uuid } = update;
+    if (Array.isArray(message)) {
+      for (let i = 0; i < message.length; i++) {
+        const message1 = message[i];
+        connection.query(sql, [message1, uuid], (err, result) => {
+          if (err) {
+            console.error(err);
+          }
+        });
+      }
     }
-    res.status(200).json({ message: '사용자 ID가 성공적으로 변경되었습니다.' });
-  });
+  }
+
+  res.status(200).json({ message: 'Updates completed successfully' });
 };
 
 // 메시지 삭제 컨트롤러
