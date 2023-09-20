@@ -854,7 +854,7 @@ exports.message = (req, res) => {
 
   for (const update of updates) {
     const { userid, message } = update;
-
+    const uuid = randomstring.generate(40); 
     // today_count가 배열일 경우 각각의 값을 처리
     if (Array.isArray(message)) {
       for (let i = 0; i < message.length; i++) {
