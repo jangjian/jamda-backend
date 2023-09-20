@@ -49,7 +49,10 @@ router.post("/getAllRulesByUuid",userController.getAllRulesByUuid);
 // 규칙 삭제 라우트 
 router.post("/deleteRule",userController.deleteRule);
 
-// 규칙 추가 라우트 
+// 규칙 수정 라우트 
+router.post("/updateRules",userController.updateRules);
+
+// 색깔 추가 라우트 
 router.get("/getColor",getUser, userController.getCalendarColor);
 
 // 완료된 날짜 불러오는 라우트 
