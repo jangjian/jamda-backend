@@ -1,7 +1,6 @@
 const mysql = require('mysql2');
 const fs = require('fs');
 const path = require('path');
-const multer = require("multer");
 const randomstring = require('randomstring')
 const cron = require('node-cron');
 const nodemailer = require('nodemailer');
@@ -13,17 +12,6 @@ const connection = mysql.createConnection({
 });
 
 
-var storage = multer.diskStorage({
-  destination : function(req, file, cb){
-    cb(null, "public/image/");
-  },
-  filename:function(req,file,cb){
-    const ext = path.extname(file.originalname);
-    cb(null, path.basename(file.originalname, ext) + "-" + Date().now() + ext);
-  },
-});
-
-var upload = multer({storage : storage});
 
 
 // cron.schedule('*/10 * * * * *', () => {

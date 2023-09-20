@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/user_controller'); // 사용자 컨트롤러 가져오기
+const { upload } = require("../controllers/upload_img");
 const { getUser } = require('../modules/getUser');
   
 
@@ -20,7 +21,7 @@ router.post('/logout', userController.logout);
 router.post('/leave', getUser, userController.leave);
 
 // 프로필 설정 라우트
-router.post("/setProfile", getUser, userController.setProfile);
+router.post("/setProfile", [getUser,upload.single("profile_img")],  userController.setProfile);
 
 // 프로필 수정 라우트
 router.post('/update-profile', getUser, userController.updateProfile);
