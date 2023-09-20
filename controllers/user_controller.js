@@ -859,7 +859,7 @@ exports.message = (req, res) => {
     if (Array.isArray(message)) {
       for (let i = 0; i < message.length; i++) {
         const message1 = message[i];
-        connection.query(sql, [userid, message1, uuid[i]], (err, result) => {
+        connection.query(sql, [userid, message1, uuid], (err, result) => {
           if (err) {
             console.error(err);
           }
