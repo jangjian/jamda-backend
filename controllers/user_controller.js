@@ -640,7 +640,7 @@ exports.changeUserId = (req, res) => {
 exports.changePassword = (req, res) => {
   const { accesstoken } = req.user;
   const {currentPassword, newPassword} = req.body;
-  
+
   const checkCurrentPasswordSql = 'SELECT * FROM users WHERE accesstoken = ? AND pw = ?';
   connection.query(checkCurrentPasswordSql, [accesstoken, currentPassword], (err, result) => {
     if (err) {
@@ -669,12 +669,7 @@ exports.changePassword = (req, res) => {
 // 비밀번호 찾기  변경 컨트롤러
 exports.loginChangePassword = (req, res) => {
   const { userid } = req.body; 
-  const { newPassword, confirmPassword } = req.body; 
-
-  // 비밀번호 확인
-  if (newPassword !== confirmPassword) {
-    return res.status(400).json({ error: '비밀번호와 비밀번호 확인이 일치하지 않습니다.' });
-  }
+  const { newPassword } = req.body; 
 
   // 비밀번호를 새로운 비밀번호로 업데이트
   const updatePasswordSql = 'UPDATE users SET pw = ? WHERE userid = ?';
