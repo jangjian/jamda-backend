@@ -5,10 +5,10 @@ const randomstring = require('randomstring')
 const cron = require('node-cron');
 const nodemailer = require('nodemailer');
 const connection = mysql.createConnection({
-  host: '52.78.221.233',
-  user: 'jamda',
+  host: 'localhost',
+  user: 'root',
   password: '1011',
-  database: 'jamda_db'
+  database: 'jamda_backend'
 });
 
 

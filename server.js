@@ -8,8 +8,6 @@ const PORT = 3000;
 
 app.use(cors());
 app.use(bodyParser.json());
-
-// 회원가입 라우트 사용
 app.use('/users', userRoutes);
 
 // 서버 실행

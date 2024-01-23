@@ -1,9 +1,9 @@
 const mysql = require('mysql2');
 const connection = mysql.createConnection({
-    host: '52.78.221.233',
-    user: 'jamda',
+    host: 'localhost',
+    user: 'root',
     password: '1011',
-    database: 'jamda_db'
+    database: 'jamda_backend'
   });
 
 const getUser = async (req, res, next) => {
